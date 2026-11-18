@@ -1,11 +1,11 @@
 from dataclasses import replace
 
 import pytest
+from test_eligibility import BASE, STUDENT
 
 from scholaros.models import AIUsePolicy, Decision, EligibilityResult
 from scholaros.policy import WritingAction, submission_allowed, writing_action_allowed
 from scholaros.ranking import rank_eligible
-from test_eligibility import BASE, STUDENT
 
 
 def test_ineligible_and_unknown_are_excluded():
