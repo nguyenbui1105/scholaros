@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+<title id="title">ScholarOS: Find your fit. Tell your story.</title>
+<desc id="desc">Indigo gradient banner with a constellation motif and ScholarOS typography.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#111827"/><stop offset=".55" stop-color="#1e1b4b"/><stop offset="1" stop-color="#312e81"/></linearGradient><linearGradient id="accent" x2="1" y2="0"><stop stop-color="#67e8f9"/><stop offset="1" stop-color="#c4b5fd"/></linearGradient></defs>
+<rect width="1200" height="360" rx="24" fill="url(#bg)"/>
+<g opacity=".25" fill="none" stroke="#a5b4fc" stroke-width="1.5"><path d="M755 73 860 130 981 70 1110 143 1013 261 867 231 755 73"/><path d="M860 130 867 231 1013 261 981 70"/></g>
+<g fill="#a5b4fc"><circle cx="755" cy="73" r="5"/><circle cx="860" cy="130" r="7"/><circle cx="981" cy="70" r="5"/><circle cx="1110" cy="143" r="6"/><circle cx="1013" cy="261" r="7"/><circle cx="867" cy="231" r="5"/></g>
+<path d="M70 83 110 62 150 83 150 125 110 146 70 125Z" fill="none" stroke="url(#accent)" stroke-width="6"/><path d="m89 107 15 15 29-33" fill="none" stroke="#67e8f9" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="72" y="217" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-weight="bold" font-size="74">Scholar<tspan fill="#a5b4fc">OS</tspan></text>
+<text x="75" y="267" fill="#cbd5e1" font-family="Arial,Helvetica,sans-serif" font-size="25">Find your fit. Tell your story. Apply with confidence.</text>
+<rect x="72" y="289" width="224" height="32" rx="16" fill="#312e81" stroke="#818cf8"/><text x="91" y="311" fill="#e0e7ff" font-family="Arial,Helvetica,sans-serif" font-size="15">EVIDENCE FIRST  ·  OPEN SOURCE</text>
+</svg>
