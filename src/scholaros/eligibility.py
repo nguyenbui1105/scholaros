@@ -1,11 +1,11 @@
 """Fail-closed eligibility checks with structured, comprehensive explanations."""
 from __future__ import annotations
 
+import unicodedata
+from collections.abc import Collection
 from datetime import date
 from pathlib import Path
-from typing import Collection
 from urllib.parse import urlsplit
-import unicodedata
 
 from .models import (
     ClaimRecord,

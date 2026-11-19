@@ -1,10 +1,10 @@
 """Typed reference entities. Never treat unspecified student fields as negative evidence."""
 from __future__ import annotations
 
+from collections.abc import Collection
 from dataclasses import dataclass, field
 from datetime import date
 from enum import Enum
-from typing import Collection
 
 
 class Decision(str, Enum):
