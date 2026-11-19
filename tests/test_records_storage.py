@@ -7,8 +7,8 @@ from scholaros.records import (
     ClaimRecord,
     Opportunity,
     Requirement,
-    SourceSnapshot,
     SourcedValue,
+    SourceSnapshot,
     StudentProfile,
     all_json_schemas,
 )
