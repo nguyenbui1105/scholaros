@@ -2,7 +2,6 @@
 import argparse
 from datetime import date, timedelta
 
-
 from .eligibility import assess_eligibility
 from .models import AIUsePolicy, ClaimRecord, Opportunity, Student
 from .ranking import rank_eligible
