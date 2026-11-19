@@ -1,3 +1,3 @@
-"""ScholarOS: evidence-first scholarship decision support (research alpha)."""
+"""ScholarOS: evidence-first local synthetic beta research toolkit."""
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

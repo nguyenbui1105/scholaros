@@ -1,6 +1,6 @@
 # Upgrade plan — v0.2 milestone
 
-**Status:** In progress. Reviewed README, status, architecture, RFC, roadmap, existing Python core/tests, CI and all 20 skill specifications before modifying code.
+**Status:** Offline synthetic v0.2 implementation completed; live-source and production requirements explicitly deferred. Reviewed README, status, architecture, RFC, roadmap, existing Python core/tests, CI and all 20 skill specifications before modifying code.
 
 ## Strategy
 Ship a **tested, offline, provenance-gated vertical slice** before extending integrations. Phase boundaries are release gates, not feature promises. No main-branch red builds deliberately accepted; every commit is CI-checked and repaired if necessary.

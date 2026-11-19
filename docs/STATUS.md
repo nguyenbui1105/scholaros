@@ -17,3 +17,6 @@
 | Web dashboard / SaaS authentication | Not implemented | N/A |
 
 **No legal, immigration or financial-aid advice.** Awards never guaranteed. Student data requires explicit consent, an encrypted vault key and additional security controls before real use; no production SaaS readiness claimed.
+
+## Release quality gates
+CI enforces Ruff lint/format, mypy --strict on src/, Python 3.11/3.12, pytest >=85% statement coverage, synthetic benchmark, and skill-contract validation. Dependency audit and Gitleaks are separately enforced. This document does not claim a hosted interface, or verified official-source eligibility.
