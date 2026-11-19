@@ -216,8 +216,8 @@ def _quote_supports(field: str, opportunity: Opportunity, quote: str) -> bool:
         if opportunity.min_gpa is None or not _valid_gpa(opportunity.min_gpa):
             return False
         numeric = re.findall(
-            r"\\b(?:minimum\\s+gpa|gpa|grade\\s+point\\s+average)"
-            r"\\s*(?:of|is|at\\s+least)?\\s*[:=]?\\s*(\\d+(?:\\.\\d+)?)",
+            r"\b(?:minimum\s+gpa|gpa|grade\s+point\s+average)"
+            r"\s*(?:of|is|at\s+least)?\s*[:=]?\s*(\d+(?:\.\d+)?)",
             quote,
             flags=re.IGNORECASE,
         )
