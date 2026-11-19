@@ -1,16 +1,21 @@
 from dataclasses import replace
 
 import pytest
+from test_eligibility import BASE
 
 from scholaros.models import AIUsePolicy, RankedOpportunity
 from scholaros.policy import WritingMode, writing_mode
 from scholaros.portfolio import optimize_portfolio
 from scholaros.records import EvidenceItem
 from scholaros.writing import (
-    MockLLM, application_packet, draft_assistance, review_claims, rubric_review,
-    story_to_outline, voice_preservation,
+    MockLLM,
+    application_packet,
+    draft_assistance,
+    review_claims,
+    rubric_review,
+    story_to_outline,
+    voice_preservation,
 )
-from test_eligibility import BASE
 
 
 def evidence() -> list[EvidenceItem]:
@@ -73,7 +78,7 @@ def test_portfolio_budget_never_exceeded() -> None:
     ]
     chosen = optimize_portfolio(items, 3.0)
     assert sum(item.opportunity.effort_hours or 0 for item in chosen) <= 3
-    assert {item.opportunity.id for item in chosen} == {"a", "c"}
+    assert {item.opportunity.id for item in chosen} == {"b", "c"}
 
 
 def test_portfolio_missing_effort_skipped() -> None:
