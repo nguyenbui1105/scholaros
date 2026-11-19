@@ -47,7 +47,7 @@ def build_synthetic(
         raise ValueError(f"Fixture missing explicitly quoted rules: {sorted(missing)}")
 
     def claim(key: str, statement: str) -> ClaimRecord:
-        candidate = rules[key]
+        candidate = rules["min_gpa" if key == "gpa" else key]
         return ClaimRecord(
             statement, snapshot.source_url, current, candidate.quote,
             snapshot.content_hash, "deterministic-fixture-extractor",
