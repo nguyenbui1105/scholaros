@@ -10,11 +10,11 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 authors = [{name = "ScholarOS Contributors"}]
-dependencies = ["pydantic>=2.9,<3", "cryptography>=43"]
+dependencies = ["pydantic>=2.9,<3", "cryptography>=43", "PyYAML>=6,<7"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "pytest-cov>=5", "ruff>=0.6", "mypy>=1.11",
-       "hypothesis>=6", "pip-audit>=2", "pre-commit>=4"]
+       "hypothesis>=6", "types-PyYAML>=6", "pip-audit>=2", "pre-commit>=4"]
 llm = ["openai>=1.0"]
 web = []
 

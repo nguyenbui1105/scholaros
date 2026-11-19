@@ -17,3 +17,9 @@ Fernet is enabled by supplying a key; plaintext requires an explicitly named loc
 
 ## D-006 — Product scope
 The beta vertical slice uses synthetic fixtures. No portal login, CAPTCHA bypass, unattended application submissions, or AI-generated success probabilities.
+
+## D-007 — Explicit evaluation date and timezone (2026-11-18)
+`assess_eligibility(..., today=...)` **requires a plain `datetime.date`** from the scholarship provider's local calendar date, as resolved by its verified published timezone/cutoff; it does not calculate a timezone automatically, use local machine time, or accept a `datetime` object. Calendar-date deadlines are inclusive for conservative *screening* only. If provider timezone or cutoff is unknown, the application requires human review before submission. The demo/benchmark fixes an artificial evaluation date; it must not be used to infer current live deadline status. Numeric slash dates (e.g. 03/01/2025) are ambiguous and deliberately not verified; ISO `YYYY-MM-DD` and named-month textual dates are accepted if unambiguous.
+
+## D-008 — GPA scale and conservative source language
+The reference evaluator supports only finite GPA values on a **0.0–4.0 scale**. No other scale can be inferred from a number; unsupported scales require explicit normalization with verified school policy in a future model. Invalid GPA returns `NEEDS_VERIFICATION` (the model's structured unknown state), never a positive result; any other independently verified hard mismatch remains a hard failure. Source quote validation rejects nearby negation/exclusion terms; regex screening is not sufficient legal/policy interpretation, so complex clauses require human review. Only `https` hosts with at least two labels are accepted, and a configured normalized YAML allowlist is mandatory; the allowlist is not proof of provider authority.

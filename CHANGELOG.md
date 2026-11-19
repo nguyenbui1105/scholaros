@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] — eligibility hardening
+
+- Added fail-closed 0–4 finite GPA validation, including NaN/Infinity/out-of-range guards.
+- Unified source claim and requirement verification with negation/exclusion-aware sentence context, GPA-context numeric anchors and named-month date parsing.
+- Normalized F-1/F1/f 1 and common undergraduate tokens; rejected bare string constraint collections.
+- Replaced ad hoc domain file parsing with cached PyYAML safe_load, normalized case/leading-dot/IDNA allowlist, explicit missing-config errors, and rejection of bare-TLD hosts.
+- Added explicit provider-local date policy and independently labeled 83-case adversarial benchmark with zero false-ELIGIBLE and >=95% unsupported-claim recall release gates.
+- Regression and Hypothesis coverage for dangerous inputs; no new live provider or submission claims.
+
+
 ## [0.2.0] — 2026-11-18
 
 **Offline synthetic beta; not production scholarship advice.**

@@ -11,7 +11,7 @@
 | OpenAI real adapter | Implemented, **untested live** | Requires SDK and API key |
 | Offline JSON CLI (`init`, `ingest`, `match`, `rank`, `explain`, `draft`, `review`, `packet`, `purge`, `demo`, `schemas`) | Tested | `test_cli_e2e.py` |
 | 20 skill contracts | 9 limited tested, 11 specified | `test_skill_contracts.py` |
-| Synthetic benchmark (36 pairs) | Test-asserted | `test_benchmark.py` |
+| Synthetic adversarial benchmark (83 pairs) | Test-asserted | `test_benchmark.py` |
 | Real-world scholarship eligibility or confirmed provider AI policies | Not implemented | N/A |
 | Live portal integrations / automatic submissions | Not implemented | N/A |
 | Web dashboard / SaaS authentication | Not implemented | N/A |
@@ -23,7 +23,7 @@ CI enforces Ruff lint/format, mypy --strict on src/, Python 3.11/3.12, pytest >=
 
 ## Verified release checklist (2026-11-18)
 - Python 3.11 and 3.12: test matrix passing, Ruff lint and format, strict mypy.
-- 76 tests, 92% statement coverage recorded before release formatting; final coverage minimum 85% is enforced by CI.
-- 36 synthetic eligibility pairs with test-asserted zero false-ELIGIBLE; 10 literal unsupported claims detected in their toy benchmark.
+- The v0.2.0 release previously recorded 76 tests and 92% rounded statement coverage; hardening verification is reported by its subsequent CI runs.
+- Hardening benchmark now has 83 independently labeled fictional eligibility pairs, including invalid GPA, negation/exclusion, host spoofing, visa/level aliases, and ambiguous dates; gate requires zero false-ELIGIBLE and >=95% literal unsupported-claim recall.
 - Gitleaks and dependency-audit jobs passed on the hardened build.
-- A v0.2.0 release is intended only after CI passes for the release workflow commit.
+- v0.2.0 was released; subsequent hardening changes are unreleased until separately tagged.

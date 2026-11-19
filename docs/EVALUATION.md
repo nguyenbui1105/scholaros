@@ -1,37 +1,31 @@
-# Evaluation — ScholarOS synthetic offline benchmark
+# Eligibility evaluation — adversarial synthetic benchmark
 
-## Protocol
-The benchmark uses **36 labeled, fictional student/opportunity pairs** recorded in `examples/benchmark_36.csv`, run by `python -m scholaros.benchmark` and `tests/test_benchmark.py`. It contains:
+## Independent label set
 
-- 6 eligible positive examples with alternate valid GPAs.
-- 10 missing required student field cases (two per academic level, visa, major, school and GPA).
-- 20 explicit mismatches (four per field).
+The file `examples/benchmark_adversarial.csv` contains **83 labeled fictional student/opportunity pairs**. Expected outcomes were authored as fixed golden labels; they are **not calculated from the eligibility engine**. The original 36 cases remain in `examples/benchmark_36.csv` for comparison. Added adversarial labels cover finite/nonfinite and out-of-range GPA, malformed/bare hosts, negation and exclusions in eligibility quotes, visa and level aliases, named-month dates, and ambiguous numeric dates.
 
-Eligibility is compared against manually specified expected **four-state decisions**. A second audit uses ten **synthetic unsupported claims**, all distinct from the one confirmed evidence statement.
+One fixed fictional opportunity/source snapshot is varied per case, with the date fixed to 2026-11-18. This controls time-dependent outcomes; it does not validate any actual published scholarship eligibility terms. Tests additionally cover malformed YAML, missing config, bare constraint strings, source hashes, property-based combinations, and the explicit-date policy.
 
-## Results (deterministic synthetic fixture only)
-On the labeled fixtures, expected from the benchmark harness and asserted by the tests:
+## Blocking release thresholds
 
-| Metric | Result |
-| --- | ---: |
-| Labeled pairs | 36 |
-| Eligible precision | 1.000 (6 TP, 0 FP) |
-| Eligible recall | 1.000 (6 TP, 0 FN) |
-| False-ELIGIBLE rate | 0.000 (0 / 30 non-eligible) |
-| Four-state exact accuracy | 1.000 (36 / 36) |
-| Literal unsupported-claim detection | 1.000 (10 / 10) |
+The benchmark CLI exits nonzero if **either** gate fails:
 
-**These numbers are not independently measured performance on real scholarship providers or students.** The cases are intentionally simple and share one synthetic rule source; results are not generalizable. A real-world performance claim requires held-out institution-specific snapshots, manually checked rule provenance, adversarial extraction cases and blinded review.
+| Metric | Minimum |
+| --- | --- |
+| Number of independently labeled eligibility pairs | >= 60 |
+| False-ELIGIBLE rate (FP / all non-eligible cases) | **exactly 0.0** |
+| Unsupported-claim recall (flagged unsupported / all known unsupported) | **>= 0.95** |
 
-## Failure and limitations
-- Quote presence and metadata are not by themselves proof of source authenticity or correct interpretation.
-- A literal reviewer will incorrectly reject some valid paraphrases and may miss complex unsupported implications.
-- Current source fetching is opt-in and untested against real provider terms/robots; there is no production scholarship catalog.
-- Priority scores are not award probabilities; no scholarship award outcomes have been measured.
+The unsupported-claim probe uses 20 fictional unverified statements against one approved statement. It is a literal exact-match validator—not semantic fact verification. Unit tests also require 100% exact-state accuracy and eligible precision/recall on this intentionally restricted benchmark.
 
-## Reproduction
+## Reproduce
+
 ```bash
 pip install -e ".[dev]"
 python -m scholaros.benchmark
-pytest -q tests/test_benchmark.py
+pytest -q tests/test_benchmark.py tests/test_eligibility_regressions.py
 ```
+
+## Limitations
+
+Golden labels use a synthetic scenario and do not assess correctness against external sources. Quote-level negation detection is conservative and does not parse full legal clauses. GPA conversion across non-US scales, provider-local timezone discovery, real domain ownership confirmation, linguistic paraphrase entailment and real provider rule extraction remain out of scope. Do not extrapolate these scores to acceptance probability or provider eligibility.
