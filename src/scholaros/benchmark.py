@@ -4,6 +4,7 @@ from __future__ import annotations
 import csv
 import json
 from dataclasses import replace
+from datetime import date
 from pathlib import Path
 
 from .eligibility import assess_eligibility
@@ -37,7 +38,7 @@ def evaluate(path: Path | None = None) -> dict[str, float | int]:
     for row in cases:
         person, award, _, _, _ = build_synthetic()
         modified = _change_student(person, row["field"], row["value"])
-        predicted = assess_eligibility(modified, award, today=award.verified_on).decision
+        predicted = assess_eligibility(modified, award, today=award.verified_on or date.today()).decision
         gold = Decision(row["expected"])
         if predicted is gold:
             correct += 1
