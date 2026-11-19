@@ -113,6 +113,6 @@ class Application(StrictRecord):
 
 
 def all_json_schemas() -> dict[str, dict[str, Any]]:
-    models = [SourceSnapshot, ClaimRecord, Requirement, Opportunity,
+    models: list[type[BaseModel]] = [SourceSnapshot, ClaimRecord, Requirement, Opportunity,
               StudentProfile, EvidenceItem, Application]
     return {model.__name__: model.model_json_schema() for model in models}

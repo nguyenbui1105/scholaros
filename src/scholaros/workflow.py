@@ -5,7 +5,7 @@ import json
 from dataclasses import asdict
 from datetime import UTC, date, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from .eligibility import assess_eligibility
 from .ingestion import RuleCandidate, extract_candidates, html_to_text
@@ -23,7 +23,9 @@ def load_scenario(path: Path | None = None) -> dict[str, Any]:
     document = json.loads((path or SCENARIO).read_text(encoding="utf-8"))
     if document.get("_note", "").find("SYNTHETIC") < 0:
         raise ValueError("Offline demo only accepts a clearly marked SYNTHETIC scenario")
-    return document
+    if not isinstance(document, dict):
+        raise ValueError("Synthetic scenario must be a JSON object")
+    return cast(dict[str, Any], document)
 
 
 def build_synthetic(
