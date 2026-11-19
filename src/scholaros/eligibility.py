@@ -1,6 +1,7 @@
 """Fail-closed eligibility checks with structured, comprehensive explanations."""
 from __future__ import annotations
 
+import re
 import unicodedata
 from collections.abc import Collection
 from datetime import date
@@ -72,6 +73,8 @@ def _claim_valid(claim: ClaimRecord | None, opportunity: Opportunity, today: dat
     return (
         sha256(text.encode("utf-8")).hexdigest() == claim.content_hash
         and claim.quote in text
+        and ("f-1" in normalize(claim.quote)
+             or "international students" in normalize(claim.quote))
         and normalize(claim.claim) in {"f-1 eligible", "international students eligible"}
         and bool(claim.quote.strip()) and bool(claim.content_hash.strip())
         and bool(claim.verifier.strip())
@@ -81,6 +84,30 @@ def _claim_valid(claim: ClaimRecord | None, opportunity: Opportunity, today: dat
         and authority_check(claim.source_url, allowlist=allowlist)
     )
 
+
+
+
+def _quote_supports(field: str, opportunity: Opportunity, quote: str) -> bool:
+    """A sourced quote must actually name the encoded constraint, not merely exist."""
+    if field == "deadline":
+        return opportunity.deadline is not None and opportunity.deadline.isoformat() in quote
+    if field == "gpa":
+        return (
+            opportunity.min_gpa is not None
+            and any(abs(float(v) - opportunity.min_gpa) < 1e-9
+                    for v in re.findall(r"\\d+(?:\\.\\d+)?", quote))
+        )
+    choices = {
+        "academic_level": opportunity.eligible_levels,
+        "visa_status": opportunity.eligible_visas,
+        "school": opportunity.allowed_schools,
+        "majors": opportunity.eligible_majors,
+    }.get(field, ())
+    normalized_quote = normalize(quote)
+    return bool(choices) and all(
+        re.search(r"(?<!\\w)" + re.escape(choice) + r"(?!\\w)", normalized_quote)
+        for choice in _items(choices)
+    )
 
 
 def _rule_verified(
@@ -97,6 +124,7 @@ def _rule_verified(
         and bool(claim.verifier.strip())
         and bool(claim.quote.strip())
         and claim.quote in text
+        and _quote_supports(field, opportunity, claim.quote)
         and claim.content_hash == sha256(text.encode("utf-8")).hexdigest()
         and claim.retrieved_at <= today
         and (today - claim.retrieved_at).days <= freshness_days

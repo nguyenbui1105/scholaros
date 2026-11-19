@@ -3,6 +3,7 @@ from datetime import date, timedelta
 from hashlib import sha256
 
 import pytest
+from hypothesis import given, strategies as st
 
 from scholaros.eligibility import assess_eligibility, authority_check, normalize
 from scholaros.models import ClaimRecord, Decision, Opportunity, Severity, Student
@@ -34,13 +35,43 @@ BASE = Opportunity(
 )
 
 
+
+def verified_adjust(
+    *, deadline: date | None = None, gpa: float | None = None,
+    visa: str | None = None,
+) -> Opportunity:
+    text = SOURCE_TEXT
+    quotes = dict(QUOTES)
+    new_deadline = deadline or BASE.deadline
+    new_gpa = gpa if gpa is not None else BASE.min_gpa
+    new_visa = BASE.eligible_visas
+    if deadline is not None:
+        quotes["deadline"] = f"Deadline: {deadline.isoformat()}"
+        text = text.replace(QUOTES["deadline"], quotes["deadline"])
+    if gpa is not None:
+        quotes["gpa"] = f"Minimum GPA {gpa:.1f}"
+        text = text.replace(QUOTES["gpa"], quotes["gpa"])
+    if visa is not None:
+        quotes["visa_status"] = f"Visa restriction: {visa}"
+        text += " " + quotes["visa_status"]
+        new_visa = {visa}
+    digest = sha256(text.encode("utf-8")).hexdigest()
+    claims = {
+        key: replace(RULE_CLAIMS[key], quote=quote, content_hash=digest)
+        for key, quote in quotes.items()
+    }
+    return replace(BASE, deadline=new_deadline, min_gpa=new_gpa,
+                   eligible_visas=new_visa, source_text=text, rule_claims=claims,
+                   international_claim=replace(CLAIM, content_hash=digest))
+
+
 def decision(student: Student = STUDENT, opportunity: Opportunity = BASE) -> Decision:
     return assess_eligibility(student, opportunity, today=TODAY).decision
 
 
 def test_positive_and_same_day_inclusive() -> None:
     assert decision() is Decision.ELIGIBLE
-    assert decision(opportunity=replace(BASE, deadline=TODAY)) is Decision.ELIGIBLE
+    assert decision(opportunity=verified_adjust(deadline=TODAY)) is Decision.ELIGIBLE
 
 
 @pytest.mark.parametrize("field", ["academic_level", "visa_status", "majors", "gpa", "school"])
@@ -49,7 +80,7 @@ def test_missing_student_fields_are_unknown(field: str) -> None:
 
 
 def test_explicit_mismatch_collects_unknowns() -> None:
-    o = replace(BASE, eligible_visas={"US-citizen"}, verified_on=None,
+    o = replace(verified_adjust(visa="US-citizen"), verified_on=None,
                 unknown_requirements=("unresolved residency",))
     result = assess_eligibility(STUDENT, o, today=TODAY)
     assert result.decision is Decision.INELIGIBLE
@@ -92,7 +123,7 @@ def test_stale_and_future_verification() -> None:
 
 
 def test_expired_deadline() -> None:
-    assert decision(opportunity=replace(BASE, deadline=TODAY - timedelta(days=1))) is Decision.INELIGIBLE
+    assert decision(opportunity=verified_adjust(deadline=TODAY - timedelta(days=1))) is Decision.INELIGIBLE
 
 
 def test_missing_required_claim_quote() -> None:
@@ -100,7 +131,7 @@ def test_missing_required_claim_quote() -> None:
 
 
 def test_hard_failure_never_disappears_with_unknown() -> None:
-    o = replace(BASE, deadline=TODAY - timedelta(days=1), min_gpa=4.0,
+    o = replace(verified_adjust(deadline=TODAY - timedelta(days=1), gpa=4.0),
                 unknown_requirements=("uncertain",))
     result = assess_eligibility(STUDENT, o, today=TODAY)
     assert len([r for r in result.reasons if r.severity is Severity.HARD_FAILURE]) >= 2
@@ -116,3 +147,13 @@ def test_missing_rule_provenance_is_not_eligible() -> None:
 
 def test_wrong_source_hash_or_quote_is_not_eligible() -> None:
     assert decision(opportunity=replace(BASE, source_text="Tampered")) is Decision.NEEDS_VERIFICATION
+
+
+def test_unrelated_quote_cannot_verify_rule_value() -> None:
+    assert decision(opportunity=replace(BASE, eligible_visas={"J-1"})) is Decision.NEEDS_VERIFICATION
+    assert decision(opportunity=replace(BASE, deadline=TODAY)) is Decision.NEEDS_VERIFICATION
+
+
+@given(field=st.sampled_from(["academic_level", "visa_status", "majors", "gpa", "school"]))
+def test_property_missing_student_value_never_eligible(field: str) -> None:
+    assert decision(student=replace(STUDENT, **{field: None})) is not Decision.ELIGIBLE
