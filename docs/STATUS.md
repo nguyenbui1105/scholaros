@@ -1,19 +1,19 @@
-# Implementation status — policy/essay reference phase
+# Implementation status — offline end-to-end CLI phase
 
 | Component | State | Evidence |
 | --- | --- | --- |
-| Conservative structured eligibility + snapshot quotes | Implemented/tested | `eligibility.py` |
-| Provenance schemas and encrypted SQLite vault | Implemented/tested | `records.py`, `storage.py` |
-| Two official source connectors, opt-in robots-aware fetch | Implemented, **live untested** | `ingestion.py` |
-| HTML quoted extraction, freshness and dedup | Implemented/tested on synthetic HTML | `ingestion.py` |
-| Eligible-only ranking and score factors | Implemented/tested | `ranking.py` |
-| Effort-budget optimization | Implemented, CI pending | `portfolio.py` |
-| AI writing modes and submission gates | Implemented, CI pending | `policy.py` |
-| LLMClient + MockLLM, optional OpenAI SDK | Implemented, CI pending (real adapter untested) | `writing.py` |
-| Outline, literal claim audit, voice/rubric diagnostics | Implemented, CI pending | `writing.py` |
-| Application-ready packet (not submission) | Implemented, CI pending | `writing.py` |
-| Command-line end-to-end pipeline | Not implemented yet | `docs/UPGRADE_PLAN.md` |
-| Dashboard/auth/production data handling | Not implemented | `docs/ROADMAP.md` |
-| 20 agent skills | Specifications only | `skills/` |
+| Four-state rule matching, snapshot quotes and missing data | Implemented/tested | `eligibility.py` |
+| Provenance transport schemas | Implemented/tested | `records.py`, `scholaros schemas` |
+| SQLite vault, opt-in Fernet and purge | Implemented/tested | `storage.py` |
+| PCC + OSAC source connectors with opt-in robots check | Implemented, **live untested** | `ingestion.py` |
+| Extract candidates, freshness, dedup | Implemented/tested on fixtures | `ingestion.py` |
+| Ranking, effort optimizer, explanations | Implemented/tested | `ranking.py`, `portfolio.py` |
+| AI-use gates and optional LLM interface | Implemented/tested with MockLLM only | `writing.py` |
+| Literal evidence checker, rubric diagnostics, packet | Implemented/tested | `writing.py` |
+| CLI: init, ingest, match, rank, explain, draft, review, packet, purge, demo, schemas | Implemented, CI pending | `__main__.py`, `workflow.py` |
+| Genuine published scholarship matches | **Not provided** | Synthetic demo only |
+| Live source eligibility provenance audit | **Not implemented** | Only fixture quotes checked |
+| Dashboard, SaaS auth, autonomous submissions | **Not implemented** | Out of scope |
+| 20 skills | Specifications only; not 20 executable agents | `skills/` |
 
-**Important:** Evidence audit is deliberately literal and will flag supported paraphrases; it is NOT semantic entailment checking. The OpenAI adapter is optional and untested without credentials; the deterministic mock is for offline tests. No writing feature bypasses scholarship AI-use policies, and no application is submitted by ScholarOS.
+**Scope:** Offline fixture explicitly labeled fictional. The pipeline demonstrates real stages, not a verified real-world scholarship outcome. No legal, immigration, or financial-aid advice; no award is guaranteed. Never use demo results as eligibility guidance.

@@ -94,6 +94,10 @@ def _candidate(
 def extract_candidates(snapshot: SourceSnapshot) -> list[RuleCandidate]:
     """Conservative proposals only; these are NOT authoritative eligibility decisions."""
     patterns = (
+        ("academic_level", "undergraduate", r"academic level:\\s*undergraduate"),
+        ("visa_status", "F-1", r"visa:\\s*F-1"),
+        ("majors", "computer science", r"eligible majors:\\s*computer science"),
+        ("school", "Demo College", r"eligible schools:\\s*Demo College"),
         ("international", "F-1", r"F-1 students (?:may apply|are eligible)"),
         ("international", "international", r"international students (?:may apply|are eligible)"),
         ("min_gpa", "dynamic", r"minimum GPA (?:of |is )?(\d(?:\.\d{1,2})?)"),

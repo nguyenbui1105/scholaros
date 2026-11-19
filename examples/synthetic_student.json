@@ -1,0 +1,34 @@
+{
+  "_note": "SYNTHETIC DATA. NOT A REAL APPLICANT OR SCHOLARSHIP.",
+  "student": {
+    "student_id": "synthetic-student",
+    "academic_level": "undergraduate",
+    "visa_status": "F-1",
+    "school": "Demo College",
+    "majors": ["computer science"],
+    "gpa": 3.8,
+    "consent_to_store": false
+  },
+  "opportunity": {
+    "id": "fictional-stem-award",
+    "title": "FICTIONAL STEM Scholarship — Not a real award",
+    "official_url": "https://example.edu/fictional",
+    "award_usd": 2500,
+    "effort_hours": 2.5,
+    "ai_use_policy": "assistance_allowed"
+  },
+  "evidence": [
+    {
+      "id": "e1",
+      "student_id": "synthetic-student",
+      "statement": "I practiced programming every day.",
+      "confirmed_by_student": true
+    },
+    {
+      "id": "e2",
+      "student_id": "synthetic-student",
+      "statement": "I won a national award.",
+      "confirmed_by_student": false
+    }
+  ]
+}
