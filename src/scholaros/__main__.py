@@ -2,26 +2,48 @@
 import argparse
 from datetime import date, timedelta
 
+
 from .eligibility import assess_eligibility
 from .models import AIUsePolicy, ClaimRecord, Opportunity, Student
 from .ranking import rank_eligible
+
+
+def source_claims(url: str, today: date, content: str) -> tuple[ClaimRecord, dict[str, ClaimRecord]]:
+    from hashlib import sha256
+
+    digest = sha256(content.encode("utf-8")).hexdigest()
+    quotes = {
+        "academic_level": "Undergraduate students are eligible",
+        "visa_status": "F-1 students are eligible",
+        "majors": "Computer science majors are eligible",
+        "school": "Demo College students are eligible",
+        "gpa": "Minimum GPA 3.5",
+        "deadline": "Deadline: 2027-12-31",
+    }
+    claims = {
+        key: ClaimRecord(key, url, today, quote, digest, "synthetic-fixture")
+        for key, quote in quotes.items()
+    }
+    return ClaimRecord("F-1 eligible", url, today, quotes["visa_status"], digest,
+                       "synthetic-fixture"), claims
 
 
 def demo() -> None:
     today = date.today()
     student = Student("undergraduate", "F-1", {"computer_science"}, 3.8, "Demo College")
     url = "https://demo.edu/scholarship"
+    text = ("Undergraduate students are eligible. F-1 students are eligible. "
+            "Computer science majors are eligible. Demo College students are eligible. "
+            "Minimum GPA 3.5. Deadline: 2027-12-31.")
+    international, claims = source_claims(url, today, text)
     opportunities = [
         Opportunity(
             id="demo-stem", title="Fictional STEM Opportunity — NOT REAL",
             official_url=url, eligible_levels={"undergraduate"},
             eligible_visas={"F-1"}, eligible_majors={"computer_science"},
             min_gpa=3.5, allowed_schools={"Demo College"},
-            deadline=today + timedelta(days=45), verified_on=today,
-            international_claim=ClaimRecord(
-                "F-1 eligible", url, today,
-                "F-1 students are eligible (fictional fixture).", "fixture-hash", "fixture",
-            ),
+            deadline=date(2027, 12, 31), verified_on=today,
+            international_claim=international, source_text=text, rule_claims=claims,
             ai_use_policy=AIUsePolicy.EDITING_ONLY,
             award_usd=2500, effort_hours=3.0,
         ),

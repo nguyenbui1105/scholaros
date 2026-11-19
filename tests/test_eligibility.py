@@ -1,5 +1,6 @@
 from dataclasses import replace
 from datetime import date, timedelta
+from hashlib import sha256
 
 import pytest
 
@@ -9,13 +10,27 @@ from scholaros.models import ClaimRecord, Decision, Opportunity, Severity, Stude
 TODAY = date(2026, 11, 18)
 URL = "https://example.edu/award"
 STUDENT = Student("undergraduate", "F-1", {"cs"}, 3.8, "PCC")
-CLAIM = ClaimRecord("F-1 eligible", URL, TODAY, "F-1 may apply", "sha256-test", "reviewer")
+SOURCE_TEXT = ("Undergraduate students are eligible. F-1 students are eligible. "
+               "CS majors are eligible. PCC students are eligible. Minimum GPA 3.0. "
+               "Deadline: 2026-11-28.")
+HASH = sha256(SOURCE_TEXT.encode("utf-8")).hexdigest()
+QUOTES = {
+    "academic_level": "Undergraduate students are eligible",
+    "visa_status": "F-1 students are eligible",
+    "majors": "CS majors are eligible",
+    "school": "PCC students are eligible",
+    "gpa": "Minimum GPA 3.0",
+    "deadline": "Deadline: 2026-11-28",
+}
+RULE_CLAIMS = {k: ClaimRecord(k, URL, TODAY, v, HASH, "reviewer")
+               for k, v in QUOTES.items()}
+CLAIM = ClaimRecord("F-1 eligible", URL, TODAY, QUOTES["visa_status"], HASH, "reviewer")
 BASE = Opportunity(
     "test", "Synthetic only", URL,
     eligible_levels={"undergraduate"}, eligible_visas={"F-1"},
     eligible_majors={"cs"}, min_gpa=3.0, allowed_schools={"PCC"},
     deadline=TODAY + timedelta(days=10), verified_on=TODAY,
-    international_claim=CLAIM,
+    international_claim=CLAIM, source_text=SOURCE_TEXT, rule_claims=RULE_CLAIMS,
 )
 
 
@@ -94,3 +109,10 @@ def test_hard_failure_never_disappears_with_unknown() -> None:
 def test_negative_freshness_rejected() -> None:
     with pytest.raises(ValueError):
         assess_eligibility(STUDENT, BASE, today=TODAY, freshness_days=-1)
+
+def test_missing_rule_provenance_is_not_eligible() -> None:
+    assert decision(opportunity=replace(BASE, rule_claims={})) is Decision.NEEDS_VERIFICATION
+
+
+def test_wrong_source_hash_or_quote_is_not_eligible() -> None:
+    assert decision(opportunity=replace(BASE, source_text="Tampered")) is Decision.NEEDS_VERIFICATION

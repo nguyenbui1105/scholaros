@@ -1,7 +1,7 @@
 """Typed reference entities. Never treat unspecified student fields as negative evidence."""
 from __future__ import annotations
 
-from collections.abc import Collection
+from collections.abc import Collection, Mapping
 from dataclasses import dataclass, field
 from datetime import date
 from enum import StrEnum
@@ -73,6 +73,8 @@ class Opportunity:
     effort_hours: float | None = None
     unknown_requirements: tuple[str, ...] = ()
     international_claim: ClaimRecord | None = None
+    source_text: str | None = None
+    rule_claims: Mapping[str, ClaimRecord] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)

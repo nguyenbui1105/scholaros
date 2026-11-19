@@ -4,6 +4,7 @@ from __future__ import annotations
 import unicodedata
 from collections.abc import Collection
 from datetime import date
+from hashlib import sha256
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -65,14 +66,40 @@ def _claim_valid(claim: ClaimRecord | None, opportunity: Opportunity, today: dat
                  freshness_days: int, allowlist: Collection[str] | None) -> bool:
     if claim is None:
         return False
+    text = opportunity.source_text
+    if text is None:
+        return False
     return (
-        normalize(claim.claim) in {"f-1 eligible", "international students eligible"}
+        sha256(text.encode("utf-8")).hexdigest() == claim.content_hash
+        and claim.quote in text
+        and normalize(claim.claim) in {"f-1 eligible", "international students eligible"}
         and bool(claim.quote.strip()) and bool(claim.content_hash.strip())
         and bool(claim.verifier.strip())
         and claim.retrieved_at <= today
         and (today - claim.retrieved_at).days <= freshness_days
         and claim.source_url == opportunity.official_url
         and authority_check(claim.source_url, allowlist=allowlist)
+    )
+
+
+
+def _rule_verified(
+    field: str, opportunity: Opportunity, today: date, freshness_days: int,
+    allowlist: Collection[str] | None,
+) -> bool:
+    claim = opportunity.rule_claims.get(field)
+    text = opportunity.source_text
+    if claim is None or text is None:
+        return False
+    return (
+        claim.source_url == opportunity.official_url
+        and authority_check(claim.source_url, allowlist=allowlist)
+        and bool(claim.verifier.strip())
+        and bool(claim.quote.strip())
+        and claim.quote in text
+        and claim.content_hash == sha256(text.encode("utf-8")).hexdigest()
+        and claim.retrieved_at <= today
+        and (today - claim.retrieved_at).days <= freshness_days
     )
 
 
@@ -115,23 +142,32 @@ def assess_eligibility(
         if not choices:
             add("rule_unverified", key, f"No explicit {key} restriction was verified",
                 Severity.UNKNOWN)
+        elif not _rule_verified(key, opportunity, today, freshness_days, allowlist):
+            add("rule_provenance_missing", key, "Rule has no snapshot-backed quote",
+                Severity.UNKNOWN)
         elif actual and normalize(actual) not in choices:
             add("mismatch", key, f"Student {key} does not match verified constraint",
                 Severity.HARD_FAILURE)
     majors = _items(opportunity.eligible_majors)
     if not majors:
         add("rule_unverified", "majors", "Major restriction is not verified", Severity.UNKNOWN)
+    elif not _rule_verified("majors", opportunity, today, freshness_days, allowlist):
+        add("rule_provenance_missing", "majors", "Major rule lacks quote", Severity.UNKNOWN)
     elif student.majors is not None and _items(student.majors) and not majors.intersection(
         _items(student.majors)
     ):
         add("mismatch", "majors", "Student majors do not match", Severity.HARD_FAILURE)
     if opportunity.min_gpa is None:
         add("rule_unverified", "gpa", "Minimum GPA rule is not verified", Severity.UNKNOWN)
+    elif not _rule_verified("gpa", opportunity, today, freshness_days, allowlist):
+        add("rule_provenance_missing", "gpa", "GPA rule lacks quote", Severity.UNKNOWN)
     elif student.gpa is not None and student.gpa < opportunity.min_gpa:
         add("mismatch", "gpa", "Student GPA is below minimum", Severity.HARD_FAILURE)
 
     if opportunity.deadline is None:
         add("deadline_missing", "deadline", "No verified deadline", Severity.UNKNOWN)
+    elif not _rule_verified("deadline", opportunity, today, freshness_days, allowlist):
+        add("rule_provenance_missing", "deadline", "Deadline lacks quote", Severity.UNKNOWN)
     elif opportunity.deadline < today:
         add("deadline_expired", "deadline", "Deadline has passed", Severity.HARD_FAILURE)
 
