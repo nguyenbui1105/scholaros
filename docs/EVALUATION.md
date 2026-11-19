@@ -18,6 +18,20 @@ The benchmark CLI exits nonzero if **either** gate fails:
 
 The unsupported-claim probe uses 20 fictional unverified statements against one approved statement. It is a literal exact-match validator—not semantic fact verification. Unit tests also require 100% exact-state accuracy and eligible precision/recall on this intentionally restricted benchmark.
 
+## Measured results (GitHub Actions, synthetic fixtures)
+
+| Metric | Result |
+| --- | ---: |
+| Labeled eligibility cases | 83 |
+| Exact four-state accuracy | 83 / 83 = 100% |
+| Eligible precision and recall | 16/16 = 100% each |
+| False-ELIGIBLE rate | 0 / 67 = **0%** |
+| Unsupported-claim recall | 20 / 20 = **100%** |
+| Python 3.11 unit tests | 112 passed |
+| Statement coverage | 90.73% |
+
+These results reflect synthetic test assertions only and should not be interpreted as real-world precision or award chances. [CI verification](https://github.com/nguyenbui1105/scholaros/actions/runs/44483386434).
+
 ## Reproduce
 
 ```bash

@@ -23,7 +23,7 @@ CI enforces Ruff lint/format, mypy --strict on src/, Python 3.11/3.12, pytest >=
 
 ## Verified release checklist (2026-11-18)
 - Python 3.11 and 3.12: test matrix passing, Ruff lint and format, strict mypy.
-- The v0.2.0 release previously recorded 76 tests and 92% rounded statement coverage; hardening verification is reported by its subsequent CI runs.
-- Hardening benchmark now has 83 independently labeled fictional eligibility pairs, including invalid GPA, negation/exclusion, host spoofing, visa/level aliases, and ambiguous dates; gate requires zero false-ELIGIBLE and >=95% literal unsupported-claim recall.
+- The eligibility hardening run passed **112 tests**, Ruff lint and format, and `mypy --strict src/` on both Python 3.11/3.12; measured statement coverage was **90.73%**.
+- Hardening benchmark has **83 independently labeled fictional cases** (16 eligible positives; 67 others), **0 false-ELIGIBLE** and **20/20 literal unsupported claims detected**. Gate: zero false-ELIGIBLE and >=95% unsupported-claim recall. All figures are fixture-only.
 - Gitleaks and dependency-audit jobs passed on the hardened build.
 - v0.2.0 was released; subsequent hardening changes are unreleased until separately tagged.

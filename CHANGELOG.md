@@ -7,7 +7,7 @@
 - Normalized F-1/F1/f 1 and common undergraduate tokens; rejected bare string constraint collections.
 - Replaced ad hoc domain file parsing with cached PyYAML safe_load, normalized case/leading-dot/IDNA allowlist, explicit missing-config errors, and rejection of bare-TLD hosts.
 - Added explicit provider-local date policy and independently labeled 83-case adversarial benchmark with zero false-ELIGIBLE and >=95% unsupported-claim recall release gates.
-- Regression and Hypothesis coverage for dangerous inputs; no new live provider or submission claims.
+- Regression and Hypothesis coverage for dangerous inputs; **112 passing tests** and **90.73% statement coverage** on GitHub Actions, with the 83-case synthetic benchmark meeting the explicit gates. No new live provider or submission claims.
 
 
 ## [0.2.0] — 2026-11-18

@@ -126,7 +126,7 @@ python -m scholaros.benchmark
 python scripts/verify_skills.py
 ```
 
-A 36-pair labeled **synthetic** benchmark asserts zero false-ELIGIBLE predictions and full literal unsupported-claim detection on simple injected statements. Read [evaluation and limitations](docs/EVALUATION.md) before interpreting any numbers.
+An 83-pair **independently labeled synthetic** benchmark enforces **zero false-ELIGIBLE predictions** and **at least 95% unsupported-claim recall**. The current test suite measured 112 passing tests and 90.73% coverage (CI log); these fixture-only results are not real scholarship performance. Read [evaluation and limitations](docs/EVALUATION.md) before interpreting any numbers.
 
 ## 🛣 Next steps
 
