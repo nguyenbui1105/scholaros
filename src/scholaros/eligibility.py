@@ -95,7 +95,7 @@ def _quote_supports(field: str, opportunity: Opportunity, quote: str) -> bool:
         return (
             opportunity.min_gpa is not None
             and any(abs(float(v) - opportunity.min_gpa) < 1e-9
-                    for v in re.findall(r"\\d+(?:\\.\\d+)?", quote))
+                    for v in re.findall(r"\d+(?:\.\d+)?", quote))
         )
     choices = {
         "academic_level": opportunity.eligible_levels,
@@ -105,7 +105,7 @@ def _quote_supports(field: str, opportunity: Opportunity, quote: str) -> bool:
     }.get(field, ())
     normalized_quote = normalize(quote)
     return bool(choices) and all(
-        re.search(r"(?<!\\w)" + re.escape(choice) + r"(?!\\w)", normalized_quote)
+        re.search(r"(?<!\w)" + re.escape(choice) + r"(?!\w)", normalized_quote)
         for choice in _items(choices)
     )
 
