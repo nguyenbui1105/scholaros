@@ -6,17 +6,24 @@ permissions:
   contents: read
 jobs:
   test:
+    name: Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.python-version }}
       - name: Install
         run: python -m pip install -e ".[dev]"
-      - name: Lint
+      - name: Ruff lint
         run: ruff check src tests
-      - name: Test
-        run: pytest -q
-      - name: Demo smoke test
-        run: python -m scholaros demo
+      - name: Strict typing
+        run: mypy --strict src/
+      - name: Offline tests and coverage
+        run: pytest -q --cov=scholaros --cov-report=term-missing
+      - name: End-to-end synthetic demo
+        run: python -m scholaros demo --json
