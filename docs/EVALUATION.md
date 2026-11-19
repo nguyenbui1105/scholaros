@@ -1,17 +1,37 @@
-# Evaluation plan
+# Evaluation — ScholarOS synthetic offline benchmark
 
-## Three audit lanes
+## Protocol
+The benchmark uses **36 labeled, fictional student/opportunity pairs** recorded in `examples/benchmark_36.csv`, run by `python -m scholaros.benchmark` and `tests/test_benchmark.py`. It contains:
 
-**A. Eligibility / data integrity:** synthetic positives and hard negatives: F-1 restricted awards, citizenship clauses, graduate-only funding, GPA unknown, excluded majors, school restrictions, expired dates, stale source, absent official source, conflicting terms. Track false eligible / total ineligible as the primary safety metric.
+- 6 eligible positive examples with alternate valid GPAs.
+- 10 missing required student field cases (two per academic level, visa, major, school and GPA).
+- 20 explicit mismatches (four per field).
 
-**B. Narrative / AI policy:** blind review student-confirmed story claims vs generated text; score factual support, answer relevance, voice preservation, respect for provider AI rules and flagged ambiguous details. Record reviewer disagreement. Human-authored baseline required.
+Eligibility is compared against manually specified expected **four-state decisions**. A second audit uses ten **synthetic unsupported claims**, all distinct from the one confirmed evidence statement.
 
-**C. Product / operations:** measure time spent per completed application, missed deadlines, rework, consent correctness, portal permissions, abandonment, feedback and actual outcomes. Never confuse winning with skill-generated rubric scores.
+## Results (deterministic synthetic fixture only)
+On the labeled fixtures, expected from the benchmark harness and asserted by the tests:
 
-## Three-round self-audit protocol
+| Metric | Result |
+| --- | ---: |
+| Labeled pairs | 36 |
+| Eligible precision | 1.000 (6 TP, 0 FP) |
+| Eligible recall | 1.000 (6 TP, 0 FN) |
+| False-ELIGIBLE rate | 0.000 (0 / 30 non-eligible) |
+| Four-state exact accuracy | 1.000 (36 / 36) |
+| Literal unsupported-claim detection | 1.000 (10 / 10) |
 
-1. **Architecture:** dependency edges, explicit non-goals, schema consistency, state transitions, idempotency.
-2. **Safety & engineering:** unit tests, lint, negative controls, injection boundaries, private data minimization, policy fail-closed behavior.
-3. **Developer experience:** quickstart reproducibility, repo discoverability, working links, accessibility and honest status communication.
+**These numbers are not independently measured performance on real scholarship providers or students.** The cases are intentionally simple and share one synthetic rule source; results are not generalizable. A real-world performance claim requires held-out institution-specific snapshots, manually checked rule provenance, adversarial extraction cases and blinded review.
 
-Record observed outcomes and unresolved issues. Do not claim external CI passed until checks finish.
+## Failure and limitations
+- Quote presence and metadata are not by themselves proof of source authenticity or correct interpretation.
+- A literal reviewer will incorrectly reject some valid paraphrases and may miss complex unsupported implications.
+- Current source fetching is opt-in and untested against real provider terms/robots; there is no production scholarship catalog.
+- Priority scores are not award probabilities; no scholarship award outcomes have been measured.
+
+## Reproduction
+```bash
+pip install -e ".[dev]"
+python -m scholaros.benchmark
+pytest -q tests/test_benchmark.py
+```

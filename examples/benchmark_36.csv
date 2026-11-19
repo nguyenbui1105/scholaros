@@ -1,0 +1,37 @@
+case_id,field,value,expected
+positive_1,gpa,3.55,eligible
+positive_2,gpa,3.60,eligible
+positive_3,gpa,3.65,eligible
+positive_4,gpa,3.70,eligible
+positive_5,gpa,3.75,eligible
+positive_6,gpa,3.80,eligible
+missing_academic_level_1,academic_level,NONE,needs_verification
+missing_academic_level_2,academic_level,NONE,needs_verification
+missing_visa_status_1,visa_status,NONE,needs_verification
+missing_visa_status_2,visa_status,NONE,needs_verification
+missing_majors_1,majors,NONE,needs_verification
+missing_majors_2,majors,NONE,needs_verification
+missing_school_1,school,NONE,needs_verification
+missing_school_2,school,NONE,needs_verification
+missing_gpa_1,gpa,NONE,needs_verification
+missing_gpa_2,gpa,NONE,needs_verification
+mismatch_academic_level_1,academic_level,graduate,ineligible
+mismatch_academic_level_2,academic_level,masters,ineligible
+mismatch_academic_level_3,academic_level,high school,ineligible
+mismatch_academic_level_4,academic_level,phd,ineligible
+mismatch_visa_status_1,visa_status,J-1,ineligible
+mismatch_visa_status_2,visa_status,B-1,ineligible
+mismatch_visa_status_3,visa_status,H-1B,ineligible
+mismatch_visa_status_4,visa_status,TN,ineligible
+mismatch_majors_1,majors,biology,ineligible
+mismatch_majors_2,majors,nursing,ineligible
+mismatch_majors_3,majors,history,ineligible
+mismatch_majors_4,majors,chemistry,ineligible
+mismatch_school_1,school,Different College,ineligible
+mismatch_school_2,school,Another University,ineligible
+mismatch_school_3,school,Test Academy,ineligible
+mismatch_school_4,school,Unrelated School,ineligible
+mismatch_gpa_1,gpa,0.5,ineligible
+mismatch_gpa_2,gpa,2.0,ineligible
+mismatch_gpa_3,gpa,3.0,ineligible
+mismatch_gpa_4,gpa,3.1,ineligible
