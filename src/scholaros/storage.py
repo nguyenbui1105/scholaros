@@ -5,12 +5,10 @@ import json
 import os
 import sqlite3
 from pathlib import Path
-from typing import Any
 
 from cryptography.fernet import Fernet
 
 from .records import StudentProfile
-
 
 SCHEMA_VERSION = 1
 

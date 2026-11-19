@@ -1,7 +1,7 @@
 """Validated provenance-first transport schemas. All opportunity assertions are sourced."""
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from hashlib import sha256
 from typing import Any, Generic, TypeVar
 
@@ -30,7 +30,7 @@ class SourceSnapshot(StrictRecord):
     @classmethod
     def from_text(cls, source_url: str, text: str, retrieved_at: datetime | None = None
                   ) -> SourceSnapshot:
-        timestamp = retrieved_at or datetime.now(timezone.utc)
+        timestamp = retrieved_at or datetime.now(UTC)
         return cls(source_url=source_url, text=text, retrieved_at=timestamp,
                    content_hash=sha256(text.encode("utf-8")).hexdigest())
 

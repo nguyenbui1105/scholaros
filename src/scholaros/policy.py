@@ -1,10 +1,10 @@
 """Per-opportunity AI writing and application policy gates."""
-from enum import Enum
+from enum import StrEnum
 
 from .models import AIUsePolicy
 
 
-class WritingAction(str, Enum):
+class WritingAction(StrEnum):
     INTERVIEW = "interview"
     OUTLINE = "outline"
     EDIT = "edit"

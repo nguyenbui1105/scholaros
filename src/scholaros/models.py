@@ -4,23 +4,23 @@ from __future__ import annotations
 from collections.abc import Collection
 from dataclasses import dataclass, field
 from datetime import date
-from enum import Enum
+from enum import StrEnum
 
 
-class Decision(str, Enum):
+class Decision(StrEnum):
     ELIGIBLE = "eligible"
     INELIGIBLE = "ineligible"
     UNKNOWN = "unknown"
     NEEDS_VERIFICATION = "needs_verification"
 
 
-class Severity(str, Enum):
+class Severity(StrEnum):
     HARD_FAILURE = "hard_failure"
     UNKNOWN = "unknown"
     INFO = "info"
 
 
-class AIUsePolicy(str, Enum):
+class AIUsePolicy(StrEnum):
     PROHIBITED = "prohibited"
     EDITING_ONLY = "editing_only"
     ASSISTANCE_ALLOWED = "assistance_allowed"

@@ -1,11 +1,16 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
 
 from scholaros.records import (
-    ClaimRecord, Opportunity, Requirement, SourceSnapshot, SourcedValue,
-    StudentProfile, all_json_schemas,
+    ClaimRecord,
+    Opportunity,
+    Requirement,
+    SourceSnapshot,
+    SourcedValue,
+    StudentProfile,
+    all_json_schemas,
 )
 from scholaros.storage import connect, load_student, purge_student, save_student
 
@@ -14,7 +19,7 @@ def sample_record() -> tuple[SourceSnapshot, Opportunity]:
     source = SourceSnapshot.from_text(
         "https://fixture.edu/award",
         "Example University Scholarship. F-1 eligible. Apply by 2027-06-01. $2000 award.",
-        datetime(2026, 11, 18, tzinfo=timezone.utc),
+        datetime(2026, 11, 18, tzinfo=UTC),
     )
     def sourced(value: str, span: str) -> SourcedValue[str]:
         claim = ClaimRecord(
