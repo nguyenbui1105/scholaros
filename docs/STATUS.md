@@ -20,3 +20,10 @@
 
 ## Release quality gates
 CI enforces Ruff lint/format, mypy --strict on src/, Python 3.11/3.12, pytest >=85% statement coverage, synthetic benchmark, and skill-contract validation. Dependency audit and Gitleaks are separately enforced. This document does not claim a hosted interface, or verified official-source eligibility.
+
+## Verified release checklist (2026-11-18)
+- Python 3.11 and 3.12: test matrix passing, Ruff lint and format, strict mypy.
+- 76 tests, 92% statement coverage recorded before release formatting; final coverage minimum 85% is enforced by CI.
+- 36 synthetic eligibility pairs with test-asserted zero false-ELIGIBLE; 10 literal unsupported claims detected in their toy benchmark.
+- Gitleaks and dependency-audit jobs passed on the hardened build.
+- A v0.2.0 release is intended only after CI passes for the release workflow commit.
