@@ -1,7 +1,10 @@
-"""Typed, deliberately small reference-domain models."""
+"""Typed reference entities. Never treat unspecified student fields as negative evidence."""
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from datetime import date
 from enum import Enum
+from typing import Collection
 
 
 class Decision(str, Enum):
@@ -9,6 +12,12 @@ class Decision(str, Enum):
     INELIGIBLE = "ineligible"
     UNKNOWN = "unknown"
     NEEDS_VERIFICATION = "needs_verification"
+
+
+class Severity(str, Enum):
+    HARD_FAILURE = "hard_failure"
+    UNKNOWN = "unknown"
+    INFO = "info"
 
 
 class AIUsePolicy(str, Enum):
@@ -19,12 +28,30 @@ class AIUsePolicy(str, Enum):
 
 
 @dataclass(frozen=True)
-class Student:
-    """Only non-sensitive attributes needed for the offline demo."""
+class ClaimRecord:
+    """Traceable claim, not self-authenticating proof of provider permission."""
 
-    academic_level: str
-    visa_status: str
-    majors: frozenset[str]
+    claim: str
+    source_url: str
+    retrieved_at: date
+    quote: str
+    content_hash: str
+    verifier: str
+
+
+@dataclass(frozen=True)
+class Reason:
+    code: str
+    field: str
+    message: str
+    severity: Severity
+
+
+@dataclass(frozen=True)
+class Student:
+    academic_level: str | None = None
+    visa_status: str | None = None
+    majors: Collection[str] | None = None
     gpa: float | None = None
     school: str | None = None
 
@@ -34,25 +61,24 @@ class Opportunity:
     id: str
     title: str
     official_url: str
-    eligible_levels: frozenset[str] = frozenset()
-    eligible_visas: frozenset[str] = frozenset()
-    eligible_majors: frozenset[str] = frozenset()
+    eligible_levels: Collection[str] = ()
+    eligible_visas: Collection[str] = ()
+    eligible_majors: Collection[str] = ()
     min_gpa: float | None = None
-    allowed_schools: frozenset[str] = frozenset()
+    allowed_schools: Collection[str] = ()
     deadline: date | None = None
     verified_on: date | None = None
     ai_use_policy: AIUsePolicy = AIUsePolicy.UNKNOWN
     award_usd: int | None = None
     effort_hours: float | None = None
     unknown_requirements: tuple[str, ...] = ()
-    # True only if an authoritative source has explicitly confirmed international eligibility.
-    international_eligibility_confirmed: bool = False
+    international_claim: ClaimRecord | None = None
 
 
 @dataclass(frozen=True)
 class EligibilityResult:
     decision: Decision
-    reasons: tuple[str, ...]
+    reasons: tuple[Reason, ...]
     requires_human_review: bool = False
 
 

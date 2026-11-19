@@ -1,17 +1,16 @@
-# Implementation status — v0.1 research alpha
+# Implementation status — correctness phase
 
-| Area | State | Evidence |
+| Capability | Status | Evidence |
 | --- | --- | --- |
-| Python package + offline CLI | Implemented | `src/scholaros/__main__.py` |
-| Conservative eligibility (coded gates) | Implemented, limited | `eligibility.py`, tests |
-| Deterministic ranking of verified-eligible records | Implemented, heuristic | `ranking.py`, tests |
-| AI writing/action policy gates | Implemented, limited | `policy.py`, tests |
-| 20 skill contracts | Specified, not automated | `skills/*/SKILL.md` |
-| Source crawling/official provider validation | Not implemented | RFC |
-| Story interview and private vault | Not implemented | RFC |
-| LLM writing assistants | Not implemented | RFC |
-| Dashboard / database / authentication | Not implemented | roadmap |
-| Browser prefill and submission integrations | Not implemented | roadmap |
-| Real scholarship catalog or success prediction | Not provided | explicit scope |
+| Four-state eligibility with structured reasons | Implemented, CI validation pending | `eligibility.py` |
+| Missing student values conservatively handled | Implemented, CI validation pending | `tests/test_eligibility.py` |
+| Unicode/case/whitespace normalization | Implemented, CI validation pending | `eligibility.py` |
+| Domain allowlist + malformed URL handling | Implemented (shape check only) | `config/official_domains.yaml` |
+| Traceable international claim required | Implemented (claim is caller-supplied, not independently authenticated) | `models.py` |
+| Offline fictional demo | Implemented | `__main__.py` |
+| Actual scholarship ingestion/verified sources | Not implemented | `docs/UPGRADE_PLAN.md` |
+| SQLite student vault, JSON schemas, real LLM | Not implemented | `docs/UPGRADE_PLAN.md` |
+| Dashboard, live submission, SaaS | Not implemented | `docs/ROADMAP.md` |
+| 20 skills | Specifications only | `skills/` |
 
-**Important:** The reference model's `international_eligibility_confirmed` flag is a caller-provided assertion and is **not itself verified by the engine**. A production implementation must require independently auditable, official-source-backed claim records before setting it. HTTPS URL shape is not source authenticity.
+**Deadline:** dates are inclusive: deadline == today does not expire. This does *not* establish the cutoff time zone. **Freshness:** verified age <= `freshness_days` is current; future-dated stamps are invalid. **Unknown rule:** no constraint is not affirmative unrestricted eligibility. **Authority:** accepted HTTPS domain suffixes are plausible, not independently authenticated. No real applicant PII supported.

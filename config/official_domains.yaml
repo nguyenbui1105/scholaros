@@ -1,0 +1,5 @@
+# Conservative authority candidates; provider affiliation must still be verified.
+domains:
+  - edu
+  - gov
+  # Synthetic fixtures only. Do not add example.org as a real provider.

@@ -1,61 +1,162 @@
-"""Conservative, deterministic eligibility checks; never infer unknown terms."""
+"""Fail-closed eligibility checks with structured, comprehensive explanations."""
+from __future__ import annotations
+
 from datetime import date
-from urllib.parse import urlparse
+from pathlib import Path
+from typing import Collection
+from urllib.parse import urlsplit
+import unicodedata
 
-from .models import Decision, EligibilityResult, Opportunity, Student
+from .models import (
+    ClaimRecord,
+    Decision,
+    EligibilityResult,
+    Opportunity,
+    Reason,
+    Severity,
+    Student,
+)
 
 
-def _official_https(url: str) -> bool:
-    parsed = urlparse(url)
-    return parsed.scheme == "https" and bool(parsed.hostname)
+def normalize(value: str) -> str:
+    """Casefold, normalize Unicode, and collapse whitespace."""
+    return " ".join(unicodedata.normalize("NFKC", value).casefold().split())
+
+
+def _items(values: Collection[str] | None) -> frozenset[str]:
+    return frozenset(normalize(v) for v in values or () if normalize(v))
+
+
+def allowed_hosts(config: Path | None = None) -> frozenset[str]:
+    """Read a limited domains YAML list without arbitrary YAML deserialization."""
+    if config is None:
+        config = Path(__file__).resolve().parents[2] / "config" / "official_domains.yaml"
+    if not config.is_file():
+        return frozenset({"edu", "gov"})
+    hosts: set[str] = set()
+    for raw in config.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if line.startswith("- "):
+            host = line[2:].strip().lower().strip('"').strip("'")
+            if host and all(c.isalnum() or c in ".-" for c in host):
+                hosts.add(host.lstrip("."))
+    return frozenset(hosts)
+
+
+def authority_check(url: str, *, allowlist: Collection[str] | None = None) -> bool:
+    """Conservative URL-shape/domain screen; not independent source verification."""
+    try:
+        parsed = urlsplit(url)
+        if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password:
+            return False
+        if parsed.port not in (None, 443) or parsed.fragment:
+            return False
+        host = parsed.hostname.lower().rstrip(".")
+        if not host or host.replace(".", "").isdigit():
+            return False
+        allowed = allowlist if allowlist is not None else allowed_hosts()
+        return any(host == domain or host.endswith("." + domain)
+                   for domain in allowed if domain)
+    except (ValueError, TypeError, AttributeError):
+        return False
+
+
+def _claim_valid(claim: ClaimRecord | None, opportunity: Opportunity, today: date,
+                 freshness_days: int, allowlist: Collection[str] | None) -> bool:
+    if claim is None:
+        return False
+    return (
+        normalize(claim.claim) in {"f-1 eligible", "international students eligible"}
+        and bool(claim.quote.strip()) and bool(claim.content_hash.strip())
+        and bool(claim.verifier.strip())
+        and claim.retrieved_at <= today
+        and (today - claim.retrieved_at).days <= freshness_days
+        and claim.source_url == opportunity.official_url
+        and authority_check(claim.source_url, allowlist=allowlist)
+    )
 
 
 def assess_eligibility(
-    student: Student, opportunity: Opportunity, *, today: date, freshness_days: int = 90
+    student: Student,
+    opportunity: Opportunity,
+    *,
+    today: date,
+    freshness_days: int = 90,
+    allowlist: Collection[str] | None = None,
 ) -> EligibilityResult:
-    """A negative known constraint dominates; uncertainty blocks positive conclusions."""
+    """Same-day deadlines are inclusive; freshness expires when age > freshness_days."""
     if freshness_days < 0:
         raise ValueError("freshness_days must be nonnegative")
-    reasons: list[str] = []
-    failures: list[str] = []
-    unknowns: list[str] = []
+    reasons: list[Reason] = []
 
-    if opportunity.deadline is not None and opportunity.deadline < today:
-        failures.append("deadline has passed")
-    if opportunity.eligible_levels and student.academic_level not in opportunity.eligible_levels:
-        failures.append("academic level is not eligible")
-    if opportunity.eligible_visas and student.visa_status not in opportunity.eligible_visas:
-        failures.append("visa status is not eligible")
-    if opportunity.eligible_majors and not student.majors.intersection(opportunity.eligible_majors):
-        failures.append("major is not eligible")
-    if opportunity.allowed_schools:
-        if student.school is None:
-            unknowns.append("school is missing")
-        elif student.school not in opportunity.allowed_schools:
-            failures.append("school is not eligible")
-    if opportunity.min_gpa is not None:
-        if student.gpa is None:
-            unknowns.append("GPA is missing")
-        elif student.gpa < opportunity.min_gpa:
-            failures.append("GPA is below minimum")
+    def add(code: str, field: str, message: str, severity: Severity) -> None:
+        reasons.append(Reason(code, field, message, severity))
 
-    if failures:
-        return EligibilityResult(Decision.INELIGIBLE, tuple(failures))
-    if not _official_https(opportunity.official_url):
-        unknowns.append("official HTTPS source URL is missing or invalid")
+    # Missing values are unknown, never negative evidence.
+    for key, value in (
+        ("academic_level", student.academic_level),
+        ("visa_status", student.visa_status),
+        ("school", student.school),
+        ("gpa", student.gpa),
+        ("majors", student.majors),
+    ):
+        if value is None or (isinstance(value, str) and not value.strip()) or (
+            key == "majors" and not _items(student.majors)
+        ):
+            add("student_missing", key, f"Student {key} is missing", Severity.UNKNOWN)
+
+    comparisons: tuple[tuple[str, str | None, Collection[str]], ...] = (
+        ("academic_level", student.academic_level, opportunity.eligible_levels),
+        ("visa_status", student.visa_status, opportunity.eligible_visas),
+        ("school", student.school, opportunity.allowed_schools),
+    )
+    for key, actual, allowed in comparisons:
+        choices = _items(allowed)
+        if not choices:
+            add("rule_unverified", key, f"No explicit {key} restriction was verified",
+                Severity.UNKNOWN)
+        elif actual and normalize(actual) not in choices:
+            add("mismatch", key, f"Student {key} does not match verified constraint",
+                Severity.HARD_FAILURE)
+    majors = _items(opportunity.eligible_majors)
+    if not majors:
+        add("rule_unverified", "majors", "Major restriction is not verified", Severity.UNKNOWN)
+    elif student.majors is not None and _items(student.majors) and not majors.intersection(
+        _items(student.majors)
+    ):
+        add("mismatch", "majors", "Student majors do not match", Severity.HARD_FAILURE)
+    if opportunity.min_gpa is None:
+        add("rule_unverified", "gpa", "Minimum GPA rule is not verified", Severity.UNKNOWN)
+    elif student.gpa is not None and student.gpa < opportunity.min_gpa:
+        add("mismatch", "gpa", "Student GPA is below minimum", Severity.HARD_FAILURE)
+
     if opportunity.deadline is None:
-        unknowns.append("deadline has not been verified")
-    if opportunity.verified_on is None:
-        unknowns.append("source verification date is missing")
-    elif opportunity.verified_on > today:
-        unknowns.append("verification timestamp is in the future")
-    elif (today - opportunity.verified_on).days > freshness_days:
-        unknowns.append("source verification is stale")
-    if not opportunity.international_eligibility_confirmed:
-        unknowns.append("international student eligibility unconfirmed")
-    unknowns.extend(opportunity.unknown_requirements)
+        add("deadline_missing", "deadline", "No verified deadline", Severity.UNKNOWN)
+    elif opportunity.deadline < today:
+        add("deadline_expired", "deadline", "Deadline has passed", Severity.HARD_FAILURE)
 
-    if unknowns:
-        return EligibilityResult(Decision.NEEDS_VERIFICATION, tuple(unknowns), True)
-    reasons.append("all encoded eligibility gates passed with verified evidence")
-    return EligibilityResult(Decision.ELIGIBLE, tuple(reasons))
+    if not authority_check(opportunity.official_url, allowlist=allowlist):
+        add("source_untrusted", "official_url", "Official domain not recognized", Severity.UNKNOWN)
+    if opportunity.verified_on is None:
+        add("source_missing", "verified_on", "Verification timestamp absent", Severity.UNKNOWN)
+    elif opportunity.verified_on > today or (
+        today - opportunity.verified_on
+    ).days > freshness_days:
+        add("source_stale", "verified_on", "Source is stale or future-dated", Severity.UNKNOWN)
+    if not _claim_valid(opportunity.international_claim, opportunity, today,
+                        freshness_days, allowlist):
+        add("claim_unverified", "international_claim",
+            "International/F-1 eligibility lacks fresh traceable claim", Severity.UNKNOWN)
+    for requirement in opportunity.unknown_requirements:
+        add("rule_ambiguous", "requirements", requirement, Severity.UNKNOWN)
+
+    hard = any(r.severity is Severity.HARD_FAILURE for r in reasons)
+    unknown = any(r.severity is Severity.UNKNOWN for r in reasons)
+    if hard:
+        decision = Decision.INELIGIBLE
+    elif unknown:
+        decision = Decision.NEEDS_VERIFICATION
+    else:
+        decision = Decision.ELIGIBLE
+        add("all_checked", "eligibility", "All modeled gates verified", Severity.INFO)
+    return EligibilityResult(decision, tuple(reasons), unknown)
