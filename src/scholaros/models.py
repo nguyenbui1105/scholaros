@@ -23,6 +23,7 @@ class Severity(StrEnum):
 class AIUsePolicy(StrEnum):
     PROHIBITED = "prohibited"
     EDITING_ONLY = "editing_only"
+    DISCLOSE_REQUIRED = "disclose_required"
     ASSISTANCE_ALLOWED = "assistance_allowed"
     UNKNOWN = "unknown"
 
