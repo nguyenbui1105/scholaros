@@ -213,12 +213,15 @@ def _quote_supports(field: str, opportunity: Opportunity, quote: str) -> bool:
     if field == "deadline":
         return opportunity.deadline is not None and opportunity.deadline in _dated_values(quote)
     if field == "gpa":
-        if not _valid_gpa(opportunity.min_gpa) or not _GPA_CONTEXT.search(quote):
+        if opportunity.min_gpa is None or not _valid_gpa(opportunity.min_gpa):
             return False
-        return any(
-            abs(float(item) - float(opportunity.min_gpa)) < 1e-9
-            for item in re.findall(r"(?<!\w)\d+(?:\.\d+)?(?!\w)", quote)
+        numeric = re.findall(
+            r"\\b(?:minimum\\s+gpa|gpa|grade\\s+point\\s+average)"
+            r"\\s*(?:of|is|at\\s+least)?\\s*[:=]?\\s*(\\d+(?:\\.\\d+)?)",
+            quote,
+            flags=re.IGNORECASE,
         )
+        return any(abs(float(value) - opportunity.min_gpa) < 1e-9 for value in numeric)
     choices: Collection[str] = {
         "academic_level": opportunity.eligible_levels,
         "visa_status": opportunity.eligible_visas,
@@ -367,7 +370,12 @@ def assess_eligibility(
         pass  # Already accounted for as unknown.
     elif not _rule_verified("gpa", opportunity, today, freshness_days, allowlist):
         add("rule_provenance_missing", "gpa", "GPA rule lacks valid quote", Severity.UNKNOWN)
-    elif _valid_gpa(student.gpa) and float(student.gpa) < float(opportunity.min_gpa):
+    elif (
+        student.gpa is not None
+        and opportunity.min_gpa is not None
+        and _valid_gpa(student.gpa)
+        and student.gpa < opportunity.min_gpa
+    ):
         add("mismatch", "gpa", "Student GPA is below required minimum", Severity.HARD_FAILURE)
 
     if opportunity.deadline is None:
