@@ -3,7 +3,8 @@ from datetime import date, timedelta
 from hashlib import sha256
 
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
 
 from scholaros.eligibility import assess_eligibility, authority_check, normalize
 from scholaros.models import ClaimRecord, Decision, Opportunity, Severity, Student
