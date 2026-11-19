@@ -11,7 +11,7 @@ from hashlib import sha256
 from pathlib import Path
 
 from .eligibility import assess_eligibility
-from .models import ClaimRecord, Decision, Opportunity, Student
+from .models import Decision, Opportunity, Student
 from .records import EvidenceItem
 from .workflow import ROOT, build_synthetic
 from .writing import review_claims
@@ -34,20 +34,24 @@ def _replace_source_quote(opportunity: Opportunity, field: str, value: str) -> O
     source = opportunity.source_text.replace(previous.quote, value, 1)
     digest = sha256(source.encode("utf-8")).hexdigest()
     claims = {
-        key: replace(record, content_hash=digest,
-                     quote=value if key == field else record.quote)
+        key: replace(record, content_hash=digest, quote=value if key == field else record.quote)
         for key, record in opportunity.rule_claims.items()
     }
     international = opportunity.international_claim
     if international is not None:
-        international = replace(international, content_hash=digest,
-                                quote=value if field == "international" else international.quote)
-    return replace(opportunity, source_text=source, rule_claims=claims,
-                   international_claim=international)
+        international = replace(
+            international,
+            content_hash=digest,
+            quote=value if field == "international" else international.quote,
+        )
+    return replace(
+        opportunity, source_text=source, rule_claims=claims, international_claim=international
+    )
 
 
-def _change_case(student: Student, award: Opportunity, field: str, value: str
-                 ) -> tuple[Student, Opportunity]:
+def _change_case(
+    student: Student, award: Opportunity, field: str, value: str
+) -> tuple[Student, Opportunity]:
     if field == "academic_level":
         return replace(student, academic_level=None if value == "NONE" else value), award
     if field == "visa_status":
@@ -79,9 +83,7 @@ def evaluate(path: Path | None = None) -> dict[str, float | int]:
     for row in cases:
         student, award, _, _, _ = build_synthetic(today=BENCHMARK_DATE)
         modified, opportunity = _change_case(student, award, row["field"], row["value"])
-        predicted = assess_eligibility(
-            modified, opportunity, today=BENCHMARK_DATE
-        ).decision
+        predicted = assess_eligibility(modified, opportunity, today=BENCHMARK_DATE).decision
         gold = Decision(row["expected"])
         if predicted is gold:
             correct += 1
@@ -94,13 +96,15 @@ def evaluate(path: Path | None = None) -> dict[str, float | int]:
         else:
             tn += 1
 
-    evidence = [EvidenceItem(
-        id="supported", student_id="synthetic", confirmed_by_student=True,
-        statement="I practiced programming every day.",
-    )]
-    unsupported = [
-        f"I received fictional award number {i}." for i in range(10)
-    ] + [
+    evidence = [
+        EvidenceItem(
+            id="supported",
+            student_id="synthetic",
+            confirmed_by_student=True,
+            statement="I practiced programming every day.",
+        )
+    ]
+    unsupported = [f"I received fictional award number {i}." for i in range(10)] + [
         "I interned at a university research lab.",
         "I graduated with perfect marks.",
         "I developed a published medical model.",
@@ -112,9 +116,7 @@ def evaluate(path: Path | None = None) -> dict[str, float | int]:
         "I won a statewide programming competition.",
         "I served as student body president.",
     ]
-    detected = sum(
-        bool(review_claims(sentence, evidence).unsupported) for sentence in unsupported
-    )
+    detected = sum(bool(review_claims(sentence, evidence).unsupported) for sentence in unsupported)
     return {
         "pairs": len(cases),
         "exact_state_accuracy": round(correct / len(cases), 4),

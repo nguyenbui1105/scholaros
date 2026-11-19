@@ -82,8 +82,9 @@ def _domain(value: str) -> str:
         result = raw.encode("idna").decode("ascii").lower()
     except UnicodeError as exc:
         raise ValueError(f"Invalid IDNA domain: {value!r}") from exc
-    if not all(re.fullmatch(r"[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", part)
-               for part in result.split(".")):
+    if not all(
+        re.fullmatch(r"[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", part) for part in result.split(".")
+    ):
         raise ValueError(f"Invalid domain labels: {value!r}")
     return result
 
@@ -121,8 +122,14 @@ def authority_check(url: str, *, allowlist: Collection[str] | None = None) -> bo
     )
     try:
         parsed = urlsplit(url)
-        if (parsed.scheme != "https" or not parsed.hostname or parsed.username
-                or parsed.password or parsed.fragment or parsed.port not in (None, 443)):
+        if (
+            parsed.scheme != "https"
+            or not parsed.hostname
+            or parsed.username
+            or parsed.password
+            or parsed.fragment
+            or parsed.port not in (None, 443)
+        ):
             return False
         host = _domain(parsed.hostname)
         # A bare suffix such as https://gov/ is not a usable official host.
@@ -173,7 +180,7 @@ def _quote_context(source: str, quote: str) -> str | None:
     # Split only at punctuation followed by whitespace, not decimal points.
     left = list(re.finditer(r"[.!?;](?=\s|$)|\n", source[:start]))
     begin = left[-1].end() if left else 0
-    right = re.search(r"[.!?;](?=\s|$)|\n", source[start + len(quote):])
+    right = re.search(r"[.!?;](?=\s|$)|\n", source[start + len(quote) :])
     end = start + len(quote) + right.start() if right else len(source)
     return source[begin:end]
 
@@ -186,8 +193,10 @@ def _contains_token(quote: str, target: str, field: str) -> bool:
     normalized = normalize(quote)
     item = _token(target, field)
     if field == "visa_status" and item in {"f1", "j1"}:
-        return re.search(r"(?<!\w)" + item[0] + r"[\s-]*" + item[1:] + r"(?!\w)",
-                         normalized) is not None
+        return (
+            re.search(r"(?<!\w)" + item[0] + r"[\s-]*" + item[1:] + r"(?!\w)", normalized)
+            is not None
+        )
     if field == "academic_level" and item == "undergraduate":
         return re.search(r"\b(?:undergraduate|undergrad|bachelor'?s?)\b", normalized) is not None
     if field == "academic_level" and item == "graduate":
@@ -198,11 +207,9 @@ def _contains_token(quote: str, target: str, field: str) -> bool:
 def _quote_supports(field: str, opportunity: Opportunity, quote: str) -> bool:
     if field == "international_claim":
         return (
-            (_contains_token(quote, "f1", "visa_status")
-             or "international students" in normalize(quote))
-            and bool(re.search(r"\b(?:eligible|may\s+apply|visa\s*:\s*f[\s-]*1)\b",
-                               normalize(quote)))
-        )
+            _contains_token(quote, "f1", "visa_status")
+            or "international students" in normalize(quote)
+        ) and bool(re.search(r"\b(?:eligible|may\s+apply|visa\s*:\s*f[\s-]*1)\b", normalize(quote)))
     if field == "deadline":
         return opportunity.deadline is not None and opportunity.deadline in _dated_values(quote)
     if field == "gpa":
@@ -269,7 +276,11 @@ def _rule_verified(
     allowlist: Collection[str] | None,
 ) -> bool:
     return _verified_claim(
-        field, opportunity.rule_claims.get(field), opportunity, today, freshness_days,
+        field,
+        opportunity.rule_claims.get(field),
+        opportunity,
+        today,
+        freshness_days,
         allowlist,
     )
 
@@ -310,11 +321,14 @@ def assess_eligibility(
             add("student_missing", key, f"Student {key} is missing", Severity.UNKNOWN)
 
     if not _valid_gpa(student.gpa):
-        add("student_gpa_invalid", "gpa", "Missing or invalid GPA on 0-4 scale",
-            Severity.UNKNOWN)
+        add("student_gpa_invalid", "gpa", "Missing or invalid GPA on 0-4 scale", Severity.UNKNOWN)
     if opportunity.min_gpa is not None and not _valid_gpa(opportunity.min_gpa):
-        add("rule_gpa_invalid", "gpa", "Unrecognized or invalid required GPA scale",
-            Severity.UNKNOWN)
+        add(
+            "rule_gpa_invalid",
+            "gpa",
+            "Unrecognized or invalid required GPA scale",
+            Severity.UNKNOWN,
+        )
 
     comparisons: tuple[tuple[str, str | None, Collection[str]], ...] = (
         ("academic_level", student.academic_level, opportunity.eligible_levels),
@@ -326,20 +340,24 @@ def assess_eligibility(
         if not values:
             add("rule_unverified", field, f"No explicit {field} rule", Severity.UNKNOWN)
         elif not _rule_verified(field, opportunity, today, freshness_days, allowlist):
-            add("rule_provenance_missing", field, "Rule lacks valid supporting source quote",
-                Severity.UNKNOWN)
+            add(
+                "rule_provenance_missing",
+                field,
+                "Rule lacks valid supporting source quote",
+                Severity.UNKNOWN,
+            )
         elif actual and _token(actual, field) not in values:
-            add("mismatch", field, f"Student {field} does not match rule",
-                Severity.HARD_FAILURE)
+            add("mismatch", field, f"Student {field} does not match rule", Severity.HARD_FAILURE)
 
     majors = _items(opportunity.eligible_majors, "majors")
     if not majors:
         add("rule_unverified", "majors", "Major restriction unverified", Severity.UNKNOWN)
     elif not _rule_verified("majors", opportunity, today, freshness_days, allowlist):
-        add("rule_provenance_missing", "majors", "Major rule lacks valid quote",
-            Severity.UNKNOWN)
-    elif student.majors is not None and _items(student.majors, "majors") and not (
-        majors.intersection(_items(student.majors, "majors"))
+        add("rule_provenance_missing", "majors", "Major rule lacks valid quote", Severity.UNKNOWN)
+    elif (
+        student.majors is not None
+        and _items(student.majors, "majors")
+        and not (majors.intersection(_items(student.majors, "majors")))
     ):
         add("mismatch", "majors", "Student majors do not match", Severity.HARD_FAILURE)
 
@@ -350,14 +368,12 @@ def assess_eligibility(
     elif not _rule_verified("gpa", opportunity, today, freshness_days, allowlist):
         add("rule_provenance_missing", "gpa", "GPA rule lacks valid quote", Severity.UNKNOWN)
     elif _valid_gpa(student.gpa) and float(student.gpa) < float(opportunity.min_gpa):
-        add("mismatch", "gpa", "Student GPA is below required minimum",
-            Severity.HARD_FAILURE)
+        add("mismatch", "gpa", "Student GPA is below required minimum", Severity.HARD_FAILURE)
 
     if opportunity.deadline is None:
         add("deadline_missing", "deadline", "No verified deadline", Severity.UNKNOWN)
     elif not _rule_verified("deadline", opportunity, today, freshness_days, allowlist):
-        add("rule_provenance_missing", "deadline", "Deadline lacks valid quote",
-            Severity.UNKNOWN)
+        add("rule_provenance_missing", "deadline", "Deadline lacks valid quote", Severity.UNKNOWN)
     elif opportunity.deadline < today:
         add("deadline_expired", "deadline", "Deadline has passed", Severity.HARD_FAILURE)
 
@@ -365,25 +381,27 @@ def assess_eligibility(
         add("source_untrusted", "official_url", "Host is not allowlisted", Severity.UNKNOWN)
     if opportunity.verified_on is None:
         add("source_missing", "verified_on", "Verification timestamp absent", Severity.UNKNOWN)
-    elif opportunity.verified_on > today or (
-        today - opportunity.verified_on
-    ).days > freshness_days:
-        add("source_stale", "verified_on", "Source is stale or in the future",
-            Severity.UNKNOWN)
+    elif opportunity.verified_on > today or (today - opportunity.verified_on).days > freshness_days:
+        add("source_stale", "verified_on", "Source is stale or in the future", Severity.UNKNOWN)
     if not _claim_valid(
         opportunity.international_claim, opportunity, today, freshness_days, allowlist
     ):
-        add("claim_unverified", "international_claim",
+        add(
+            "claim_unverified",
+            "international_claim",
             "International eligibility claim lacks supported positive quote",
-            Severity.UNKNOWN)
+            Severity.UNKNOWN,
+        )
     for item in opportunity.unknown_requirements:
         add("rule_ambiguous", "requirements", item, Severity.UNKNOWN)
 
     hard = any(reason.severity is Severity.HARD_FAILURE for reason in reasons)
     unknown = any(reason.severity is Severity.UNKNOWN for reason in reasons)
     decision = (
-        Decision.INELIGIBLE if hard
-        else Decision.NEEDS_VERIFICATION if unknown
+        Decision.INELIGIBLE
+        if hard
+        else Decision.NEEDS_VERIFICATION
+        if unknown
         else Decision.ELIGIBLE
     )
     if decision is Decision.ELIGIBLE:

@@ -1,16 +1,16 @@
 """Regression tests for hardened evidence-aware eligibility (test-first)."""
+
 from dataclasses import replace
-from datetime import date
 from hashlib import sha256
 from pathlib import Path
 
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
+from test_eligibility import BASE, CLAIM, RULE_CLAIMS, SOURCE_TEXT, STUDENT, TODAY
 
 from scholaros.eligibility import _items, allowed_hosts, assess_eligibility, authority_check
-from scholaros.models import Decision, Student
-from test_eligibility import BASE, CLAIM, RULE_CLAIMS, SOURCE_TEXT, STUDENT, TODAY
+from scholaros.models import Decision
 
 
 def with_quote(field: str, quote: str) -> object:
@@ -23,9 +23,12 @@ def with_quote(field: str, quote: str) -> object:
         for name, claim in RULE_CLAIMS.items()
     }
     return replace(
-        BASE, source_text=text, rule_claims=claims,
-        international_claim=replace(CLAIM, content_hash=digest,
-                                    quote=quote if field == "visa_status" else CLAIM.quote),
+        BASE,
+        source_text=text,
+        rule_claims=claims,
+        international_claim=replace(
+            CLAIM, content_hash=digest, quote=quote if field == "visa_status" else CLAIM.quote
+        ),
     )
 
 
@@ -33,8 +36,7 @@ def with_quote(field: str, quote: str) -> object:
 def test_invalid_student_gpa_never_eligible(bad: float) -> None:
     result = assess_eligibility(replace(STUDENT, gpa=bad), BASE, today=TODAY)
     assert result.decision is Decision.NEEDS_VERIFICATION
-    assert any(reason.field == "gpa" and reason.severity == "unknown"
-               for reason in result.reasons)
+    assert any(reason.field == "gpa" and reason.severity == "unknown" for reason in result.reasons)
 
 
 @pytest.mark.parametrize("bad", [float("nan"), float("inf"), -1.0, 5.0])
@@ -43,23 +45,29 @@ def test_invalid_requirement_gpa_never_eligible(bad: float) -> None:
     assert result.decision is Decision.NEEDS_VERIFICATION
 
 
-@pytest.mark.parametrize("quote", [
-    "F-1 students are not eligible",
-    "F-1 students are ineligible",
-    "F-1 students are eligible except those with visas",
-    "F-1 students are eligible excluding international applicants",
-])
+@pytest.mark.parametrize(
+    "quote",
+    [
+        "F-1 students are not eligible",
+        "F-1 students are ineligible",
+        "F-1 students are eligible except those with visas",
+        "F-1 students are eligible excluding international applicants",
+    ],
+)
 def test_negated_international_quote_fails_closed(quote: str) -> None:
     opportunity = with_quote("visa_status", quote)
     assert assess_eligibility(STUDENT, opportunity, today=TODAY).decision is not Decision.ELIGIBLE
 
 
-@pytest.mark.parametrize("field,quote", [
-    ("academic_level", "Undergraduate students are not eligible"),
-    ("majors", "CS majors are ineligible"),
-    ("school", "PCC students are eligible except applicants with F-1 visas"),
-    ("gpa", "Minimum GPA 3.0 excluding F-1 students"),
-])
+@pytest.mark.parametrize(
+    "field,quote",
+    [
+        ("academic_level", "Undergraduate students are not eligible"),
+        ("majors", "CS majors are ineligible"),
+        ("school", "PCC students are eligible except applicants with F-1 visas"),
+        ("gpa", "Minimum GPA 3.0 excluding F-1 students"),
+    ],
+)
 def test_negated_requirement_quote_fails_closed(field: str, quote: str) -> None:
     opportunity = with_quote(field, quote)
     assert assess_eligibility(STUDENT, opportunity, today=TODAY).decision is not Decision.ELIGIBLE
@@ -67,7 +75,10 @@ def test_negated_requirement_quote_fails_closed(field: str, quote: str) -> None:
 
 def test_gpa_number_without_gpa_context_does_not_verify() -> None:
     opportunity = with_quote("gpa", "3.0 students enrolled")
-    assert assess_eligibility(STUDENT, opportunity, today=TODAY).decision is Decision.NEEDS_VERIFICATION
+    assert (
+        assess_eligibility(STUDENT, opportunity, today=TODAY).decision
+        is Decision.NEEDS_VERIFICATION
+    )
 
 
 @pytest.mark.parametrize("visa", ["F1", "f 1", " F-1 ", "f-1"])
@@ -122,7 +133,10 @@ def test_textual_date_parsed_in_quote() -> None:
 
 def test_ambiguous_numeric_date_does_not_verify() -> None:
     replacement = with_quote("deadline", "Deadline: 11/12/2026")
-    assert assess_eligibility(STUDENT, replacement, today=TODAY).decision is Decision.NEEDS_VERIFICATION
+    assert (
+        assess_eligibility(STUDENT, replacement, today=TODAY).decision
+        is Decision.NEEDS_VERIFICATION
+    )
 
 
 @given(st.sampled_from(["nan", "inf", "-inf"]), st.sampled_from(["F-1", "F1", "f 1"]))
@@ -131,10 +145,14 @@ def test_property_nonfinite_gpa_never_eligible(raw: str, visa: str) -> None:
     assert assess_eligibility(student, BASE, today=TODAY).decision is not Decision.ELIGIBLE
 
 
-@given(st.sampled_from(["not eligible", "ineligible", "except", "excluding"]),
-       st.sampled_from(["F-1", "F1"]))
+@given(
+    st.sampled_from(["not eligible", "ineligible", "except", "excluding"]),
+    st.sampled_from(["F-1", "F1"]),
+)
 def test_property_negations_never_eligible(negation: str, visa: str) -> None:
-    opportunity = with_quote("visa_status", f"F-1 students are eligible {negation} other applicants")
+    opportunity = with_quote(
+        "visa_status", f"F-1 students are eligible {negation} other applicants"
+    )
     student = replace(STUDENT, visa_status=visa)
     assert assess_eligibility(student, opportunity, today=TODAY).decision is not Decision.ELIGIBLE
 
