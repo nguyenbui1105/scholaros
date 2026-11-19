@@ -1,16 +1,18 @@
-# Implementation status — provenance/storage phase
+# Implementation status — deterministic source ingestion phase
 
-| Area | State | Evidence |
+| Capability | Implementation | Tested? |
 | --- | --- | --- |
-| Four-state normalized eligibility + reason codes | Implemented/tested | `eligibility.py`, `test_eligibility.py` |
-| Traceable source claim required | Implemented/tested, caller-authored claims | `models.py` |
-| Pydantic provenance transport schemas + schema exporter | Implemented, CI pending | `records.py` |
-| SQLite migration + student vault | Implemented, CI pending | `storage.py` |
-| Fernet-encrypted student vault (opt-in) | Implemented, CI pending | `storage.py` |
-| Student purge API | Implemented, CI pending | `storage.py` |
-| Online ingestion/authoritative source verification | Not implemented | `docs/UPGRADE_PLAN.md` |
-| Writing LLM adapter / application packet | Not implemented | `docs/UPGRADE_PLAN.md` |
-| Dashboard / auth / hosted SaaS | Not implemented | `docs/ROADMAP.md` |
-| 20 agent SKILL.md files | Specifications only | `skills/` |
+| Typed eligibility reasons, conservative unknowns | `eligibility.py` | Yes |
+| Claims and source allowlist | `models.py`, `config/` | Yes (not independently authenticated) |
+| Pydantic provenance transport models | `records.py` | Yes |
+| SQLite migrations, encrypted student vault, purge API | `storage.py` | Yes |
+| PCC and Oregon Student Aid connector configurations | `ingestion.py` | Offline/permission gate only |
+| Robots-aware opt-in fetch, URL restrictions and local cache | `ingestion.py` | Offline branches; live not tested |
+| Deterministic quoted rule candidates | `ingestion.py` | Yes (synthetic fixture) |
+| Source freshness and award deduplication | `ingestion.py` | Yes |
+| Real source eligibility verification | **Not implemented** | No |
+| LLM writing and application operations | Not implemented | No |
+| Dashboard / hosted SaaS | Not implemented | No |
+| Skills | 20 specifications, not all executable | No |
 
-**Important limitations:** Pydantic record schemas are separate from the reference eligibility dataclasses. Evidence/verifier strings are not proof of official policy. The vault refuses plaintext unless `SCHOLAROS_ALLOW_UNENCRYPTED_LOCAL=1`; encryption uses `SCHOLAROS_FERNET_KEY` and no keys are stored in git. SQLite `purge_student` removes logical records but does not guarantee secure deletion of copies, backups or filesystem blocks.
+All fixture awards are fictional. CLI supports offline demo only at this stage. No real applicant PII should be used in this alpha.
