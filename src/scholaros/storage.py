@@ -1,4 +1,5 @@
 """SQLite storage with atomic migration and optional Fernet encryption of student data."""
+
 from __future__ import annotations
 
 import json
@@ -63,10 +64,12 @@ def save_student(db: sqlite3.Connection, student: StudentProfile) -> None:
     raw = student.model_dump_json().encode("utf-8")
     payload = cipher.encrypt(raw) if cipher else raw
     with db:
-        db.execute("""INSERT INTO student_vault(student_id, payload, encrypted)
+        db.execute(
+            """INSERT INTO student_vault(student_id, payload, encrypted)
             VALUES (?, ?, ?) ON CONFLICT(student_id) DO UPDATE
             SET payload = excluded.payload, encrypted = excluded.encrypted""",
-            (student.student_id, payload, int(cipher is not None)))
+            (student.student_id, payload, int(cipher is not None)),
+        )
 
 
 def load_student(db: sqlite3.Connection, student_id: str) -> StudentProfile | None:
@@ -95,8 +98,10 @@ def purge_student(db: sqlite3.Connection, student_id: str) -> int:
 
 def export_schemas(path: Path) -> None:
     from .records import all_json_schemas
+
     path.mkdir(parents=True, exist_ok=True)
     for name, schema in all_json_schemas().items():
         (path / f"{name}.schema.json").write_text(
-            json.dumps(schema, indent=2) + "\n", encoding="utf-8",
+            json.dumps(schema, indent=2) + "\n",
+            encoding="utf-8",
         )

@@ -15,8 +15,7 @@ def test_skill_contract_validator() -> None:
 
 def test_universal_envelope_schema_exists() -> None:
     import json
+
     root = Path(__file__).resolve().parents[1]
-    schema = json.loads(
-        (root / "docs" / "schemas" / "universal-envelope.schema.json").read_text()
-    )
+    schema = json.loads((root / "docs" / "schemas" / "universal-envelope.schema.json").read_text())
     assert set(schema["$defs"]) == {"input", "output"}

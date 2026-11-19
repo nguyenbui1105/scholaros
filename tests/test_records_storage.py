@@ -21,19 +21,26 @@ def sample_record() -> tuple[SourceSnapshot, Opportunity]:
         "Example University Scholarship. F-1 eligible. Apply by 2027-06-01. $2000 award.",
         datetime(2026, 11, 18, tzinfo=UTC),
     )
+
     def sourced(value: str, span: str) -> SourcedValue[str]:
         claim = ClaimRecord(
-            claim=span, source_url=source.source_url, retrieved_at=source.retrieved_at,
-            content_hash=source.content_hash, extracted_text_span=span, verifier="fixture",
+            claim=span,
+            source_url=source.source_url,
+            retrieved_at=source.retrieved_at,
+            content_hash=source.content_hash,
+            extracted_text_span=span,
+            verifier="fixture",
         )
         return SourcedValue[str](value=value, provenance=claim)
+
     record = Opportunity(
         id="fixture-1",
         provider=sourced("Example University", "Example University"),
         title=sourced("Scholarship", "Scholarship"),
         deadline=sourced("2027-06-01", "2027-06-01"),
-        requirements=(Requirement(field="visa", operator="in",
-                                   expected=sourced("F-1", "F-1 eligible")),),
+        requirements=(
+            Requirement(field="visa", operator="in", expected=sourced("F-1", "F-1 eligible")),
+        ),
     )
     return source, record
 
@@ -41,8 +48,9 @@ def sample_record() -> tuple[SourceSnapshot, Opportunity]:
 def test_every_fact_must_match_snapshot() -> None:
     snapshot, opportunity = sample_record()
     assert opportunity.verify(snapshot)
-    assert not opportunity.verify(SourceSnapshot.from_text(
-        snapshot.source_url, "Changed page", snapshot.retrieved_at))
+    assert not opportunity.verify(
+        SourceSnapshot.from_text(snapshot.source_url, "Changed page", snapshot.retrieved_at)
+    )
 
 
 def test_all_models_have_schemas() -> None:
@@ -59,10 +67,10 @@ def test_no_plaintext_vault_default(tmp_path: Path, monkeypatch: pytest.MonkeyPa
 
 def test_encrypted_vault_and_purge(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     from cryptography.fernet import Fernet
+
     monkeypatch.setenv("SCHOLAROS_FERNET_KEY", Fernet.generate_key().decode())
     with connect(tmp_path / "scholaros.db") as db:
-        student = StudentProfile(student_id="synthetic", visa_status="F-1",
-                                 consent_to_store=True)
+        student = StudentProfile(student_id="synthetic", visa_status="F-1", consent_to_store=True)
         save_student(db, student)
         assert load_student(db, "synthetic") == student
         raw = db.execute("SELECT payload FROM student_vault").fetchone()[0]

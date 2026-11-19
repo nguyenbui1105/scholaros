@@ -1,4 +1,5 @@
 """Scholarship-specific AI writing and submission gates (fail closed)."""
+
 from enum import StrEnum
 
 from .models import AIUsePolicy

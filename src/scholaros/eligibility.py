@@ -1,4 +1,5 @@
 """Fail-closed eligibility checks with structured, comprehensive explanations."""
+
 from __future__ import annotations
 
 import re
@@ -57,14 +58,18 @@ def authority_check(url: str, *, allowlist: Collection[str] | None = None) -> bo
         if not host or host.replace(".", "").isdigit():
             return False
         allowed = allowlist if allowlist is not None else allowed_hosts()
-        return any(host == domain or host.endswith("." + domain)
-                   for domain in allowed if domain)
+        return any(host == domain or host.endswith("." + domain) for domain in allowed if domain)
     except (ValueError, TypeError, AttributeError):
         return False
 
 
-def _claim_valid(claim: ClaimRecord | None, opportunity: Opportunity, today: date,
-                 freshness_days: int, allowlist: Collection[str] | None) -> bool:
+def _claim_valid(
+    claim: ClaimRecord | None,
+    opportunity: Opportunity,
+    today: date,
+    freshness_days: int,
+    allowlist: Collection[str] | None,
+) -> bool:
     if claim is None:
         return False
     text = opportunity.source_text
@@ -73,10 +78,10 @@ def _claim_valid(claim: ClaimRecord | None, opportunity: Opportunity, today: dat
     return (
         sha256(text.encode("utf-8")).hexdigest() == claim.content_hash
         and claim.quote in text
-        and ("f-1" in normalize(claim.quote)
-             or "international students" in normalize(claim.quote))
+        and ("f-1" in normalize(claim.quote) or "international students" in normalize(claim.quote))
         and normalize(claim.claim) in {"f-1 eligible", "international students eligible"}
-        and bool(claim.quote.strip()) and bool(claim.content_hash.strip())
+        and bool(claim.quote.strip())
+        and bool(claim.content_hash.strip())
         and bool(claim.verifier.strip())
         and claim.retrieved_at <= today
         and (today - claim.retrieved_at).days <= freshness_days
@@ -85,17 +90,13 @@ def _claim_valid(claim: ClaimRecord | None, opportunity: Opportunity, today: dat
     )
 
 
-
-
 def _quote_supports(field: str, opportunity: Opportunity, quote: str) -> bool:
     """A sourced quote must actually name the encoded constraint, not merely exist."""
     if field == "deadline":
         return opportunity.deadline is not None and opportunity.deadline.isoformat() in quote
     if field == "gpa":
-        return (
-            opportunity.min_gpa is not None
-            and any(abs(float(v) - opportunity.min_gpa) < 1e-9
-                    for v in re.findall(r"\d+(?:\.\d+)?", quote))
+        return opportunity.min_gpa is not None and any(
+            abs(float(v) - opportunity.min_gpa) < 1e-9 for v in re.findall(r"\d+(?:\.\d+)?", quote)
         )
     choices = {
         "academic_level": opportunity.eligible_levels,
@@ -111,7 +112,10 @@ def _quote_supports(field: str, opportunity: Opportunity, quote: str) -> bool:
 
 
 def _rule_verified(
-    field: str, opportunity: Opportunity, today: date, freshness_days: int,
+    field: str,
+    opportunity: Opportunity,
+    today: date,
+    freshness_days: int,
     allowlist: Collection[str] | None,
 ) -> bool:
     claim = opportunity.rule_claims.get(field)
@@ -155,8 +159,10 @@ def assess_eligibility(
         ("gpa", student.gpa),
         ("majors", student.majors),
     ):
-        if value is None or (isinstance(value, str) and not value.strip()) or (
-            key == "majors" and not _items(student.majors)
+        if (
+            value is None
+            or (isinstance(value, str) and not value.strip())
+            or (key == "majors" and not _items(student.majors))
         ):
             add("student_missing", key, f"Student {key} is missing", Severity.UNKNOWN)
 
@@ -168,21 +174,35 @@ def assess_eligibility(
     for key, actual, allowed in comparisons:
         choices = _items(allowed)
         if not choices:
-            add("rule_unverified", key, f"No explicit {key} restriction was verified",
-                Severity.UNKNOWN)
+            add(
+                "rule_unverified",
+                key,
+                f"No explicit {key} restriction was verified",
+                Severity.UNKNOWN,
+            )
         elif not _rule_verified(key, opportunity, today, freshness_days, allowlist):
-            add("rule_provenance_missing", key, "Rule has no snapshot-backed quote",
-                Severity.UNKNOWN)
+            add(
+                "rule_provenance_missing",
+                key,
+                "Rule has no snapshot-backed quote",
+                Severity.UNKNOWN,
+            )
         elif actual and normalize(actual) not in choices:
-            add("mismatch", key, f"Student {key} does not match verified constraint",
-                Severity.HARD_FAILURE)
+            add(
+                "mismatch",
+                key,
+                f"Student {key} does not match verified constraint",
+                Severity.HARD_FAILURE,
+            )
     majors = _items(opportunity.eligible_majors)
     if not majors:
         add("rule_unverified", "majors", "Major restriction is not verified", Severity.UNKNOWN)
     elif not _rule_verified("majors", opportunity, today, freshness_days, allowlist):
         add("rule_provenance_missing", "majors", "Major rule lacks quote", Severity.UNKNOWN)
-    elif student.majors is not None and _items(student.majors) and not majors.intersection(
-        _items(student.majors)
+    elif (
+        student.majors is not None
+        and _items(student.majors)
+        and not majors.intersection(_items(student.majors))
     ):
         add("mismatch", "majors", "Student majors do not match", Severity.HARD_FAILURE)
     if opportunity.min_gpa is None:
@@ -203,14 +223,17 @@ def assess_eligibility(
         add("source_untrusted", "official_url", "Official domain not recognized", Severity.UNKNOWN)
     if opportunity.verified_on is None:
         add("source_missing", "verified_on", "Verification timestamp absent", Severity.UNKNOWN)
-    elif opportunity.verified_on > today or (
-        today - opportunity.verified_on
-    ).days > freshness_days:
+    elif opportunity.verified_on > today or (today - opportunity.verified_on).days > freshness_days:
         add("source_stale", "verified_on", "Source is stale or future-dated", Severity.UNKNOWN)
-    if not _claim_valid(opportunity.international_claim, opportunity, today,
-                        freshness_days, allowlist):
-        add("claim_unverified", "international_claim",
-            "International/F-1 eligibility lacks fresh traceable claim", Severity.UNKNOWN)
+    if not _claim_valid(
+        opportunity.international_claim, opportunity, today, freshness_days, allowlist
+    ):
+        add(
+            "claim_unverified",
+            "international_claim",
+            "International/F-1 eligibility lacks fresh traceable claim",
+            Severity.UNKNOWN,
+        )
     for requirement in opportunity.unknown_requirements:
         add("rule_ambiguous", "requirements", requirement, Severity.UNKNOWN)
 

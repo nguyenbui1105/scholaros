@@ -12,8 +12,12 @@ def test_ineligible_and_unknown_are_excluded() -> None:
     candidates = [
         (BASE, EligibilityResult(Decision.ELIGIBLE, ())),
         (replace(BASE, id="unknown"), EligibilityResult(Decision.UNKNOWN, ())),
-        (replace(BASE, id="blocked"), EligibilityResult(
-            Decision.INELIGIBLE, (Reason("mismatch", "visa", "no", Severity.HARD_FAILURE),))),
+        (
+            replace(BASE, id="blocked"),
+            EligibilityResult(
+                Decision.INELIGIBLE, (Reason("mismatch", "visa", "no", Severity.HARD_FAILURE),)
+            ),
+        ),
     ]
     assert [x.opportunity.id for x in rank_eligible(STUDENT, candidates)] == ["test"]
 
@@ -21,8 +25,10 @@ def test_ineligible_and_unknown_are_excluded() -> None:
 def test_ranking_order_deterministic_on_ties() -> None:
     a = replace(BASE, id="a")
     b = replace(BASE, id="b")
-    results = [(b, EligibilityResult(Decision.ELIGIBLE, ())),
-               (a, EligibilityResult(Decision.ELIGIBLE, ()))]
+    results = [
+        (b, EligibilityResult(Decision.ELIGIBLE, ())),
+        (a, EligibilityResult(Decision.ELIGIBLE, ())),
+    ]
     assert [x.opportunity.id for x in rank_eligible(STUDENT, results)] == ["a", "b"]
 
 
@@ -48,5 +54,7 @@ def test_submission_requires_all_three_conditions() -> None:
         for b in [False, True]:
             for c in [False, True]:
                 assert submission_allowed(
-                    student_approved=a, portal_permission_verified=b, packet_verified=c,
+                    student_approved=a,
+                    portal_permission_verified=b,
+                    packet_verified=c,
                 ) == (a and b and c)

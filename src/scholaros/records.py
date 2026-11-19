@@ -1,4 +1,5 @@
 """Validated provenance-first transport schemas. All opportunity assertions are sourced."""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
@@ -28,11 +29,16 @@ class SourceSnapshot(StrictRecord):
         return timestamp
 
     @classmethod
-    def from_text(cls, source_url: str, text: str, retrieved_at: datetime | None = None
-                  ) -> SourceSnapshot:
+    def from_text(
+        cls, source_url: str, text: str, retrieved_at: datetime | None = None
+    ) -> SourceSnapshot:
         timestamp = retrieved_at or datetime.now(UTC)
-        return cls(source_url=source_url, text=text, retrieved_at=timestamp,
-                   content_hash=sha256(text.encode("utf-8")).hexdigest())
+        return cls(
+            source_url=source_url,
+            text=text,
+            retrieved_at=timestamp,
+            content_hash=sha256(text.encode("utf-8")).hexdigest(),
+        )
 
 
 class ClaimRecord(StrictRecord):
@@ -113,6 +119,13 @@ class Application(StrictRecord):
 
 
 def all_json_schemas() -> dict[str, dict[str, Any]]:
-    models: list[type[BaseModel]] = [SourceSnapshot, ClaimRecord, Requirement, Opportunity,
-              StudentProfile, EvidenceItem, Application]
+    models: list[type[BaseModel]] = [
+        SourceSnapshot,
+        ClaimRecord,
+        Requirement,
+        Opportunity,
+        StudentProfile,
+        EvidenceItem,
+        Application,
+    ]
     return {model.__name__: model.model_json_schema() for model in models}

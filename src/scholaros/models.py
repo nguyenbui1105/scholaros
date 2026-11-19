@@ -1,4 +1,5 @@
 """Typed reference entities. Never treat unspecified student fields as negative evidence."""
+
 from __future__ import annotations
 
 from collections.abc import Collection, Mapping

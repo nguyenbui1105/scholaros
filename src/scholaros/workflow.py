@@ -1,4 +1,5 @@
 """Offline synthetic end-to-end pipeline; no scholarship assertions about real providers."""
+
 from __future__ import annotations
 
 import json
@@ -29,7 +30,9 @@ def load_scenario(path: Path | None = None) -> dict[str, Any]:
 
 
 def build_synthetic(
-    *, scenario_path: Path | None = None, html_path: Path | None = None,
+    *,
+    scenario_path: Path | None = None,
+    html_path: Path | None = None,
     today: date | None = None,
 ) -> tuple[Student, Opportunity, EligibilityResult, list[RuleCandidate], list[EvidenceItem]]:
     """Raise if a required rule quote is absent; never infer an unrestricted rule."""
@@ -37,13 +40,21 @@ def build_synthetic(
     raw = html_to_text((html_path or HTML).read_text(encoding="utf-8"))
     current = today or date.today()
     snapshot = SourceSnapshot.from_text(
-        info["opportunity"]["official_url"], raw,
+        info["opportunity"]["official_url"],
+        raw,
         datetime(current.year, current.month, current.day, tzinfo=UTC),
     )
     candidates = extract_candidates(snapshot)
     rules = {candidate.field: candidate for candidate in candidates}
-    required = {"academic_level", "visa_status", "majors", "school", "min_gpa",
-                "deadline", "international"}
+    required = {
+        "academic_level",
+        "visa_status",
+        "majors",
+        "school",
+        "min_gpa",
+        "deadline",
+        "international",
+    }
     missing = required.difference(rules)
     if missing:
         raise ValueError(f"Fixture missing explicitly quoted rules: {sorted(missing)}")
@@ -51,8 +62,12 @@ def build_synthetic(
     def claim(key: str, statement: str) -> ClaimRecord:
         candidate = rules["min_gpa" if key == "gpa" else key]
         return ClaimRecord(
-            statement, snapshot.source_url, current, candidate.quote,
-            snapshot.content_hash, "deterministic-fixture-extractor",
+            statement,
+            snapshot.source_url,
+            current,
+            candidate.quote,
+            snapshot.content_hash,
+            "deterministic-fixture-extractor",
         )
 
     person = StudentProfile.model_validate(info["student"])
@@ -65,7 +80,9 @@ def build_synthetic(
     )
     values = info["opportunity"]
     opportunity = Opportunity(
-        id=values["id"], title=values["title"], official_url=snapshot.source_url,
+        id=values["id"],
+        title=values["title"],
+        official_url=snapshot.source_url,
         eligible_levels=[rules["academic_level"].value],
         eligible_visas=[rules["visa_status"].value],
         eligible_majors=[rules["majors"].value],
@@ -75,9 +92,10 @@ def build_synthetic(
         verified_on=current,
         international_claim=claim("international", "F-1 eligible"),
         source_text=snapshot.text,
-        rule_claims={field: claim(
-            "gpa" if field == "gpa" else field, field
-        ) for field in ("academic_level", "visa_status", "majors", "school", "gpa", "deadline")},
+        rule_claims={
+            field: claim("gpa" if field == "gpa" else field, field)
+            for field in ("academic_level", "visa_status", "majors", "school", "gpa", "deadline")
+        },
         award_usd=values.get("award_usd"),
         effort_hours=values.get("effort_hours"),
         ai_use_policy=AIUsePolicy(values.get("ai_use_policy", "unknown")),
@@ -88,12 +106,16 @@ def build_synthetic(
 
 
 def run_stage(
-    stage: str, *, scenario_path: Path | None = None,
-    html_path: Path | None = None, opportunity_id: str | None = None,
+    stage: str,
+    *,
+    scenario_path: Path | None = None,
+    html_path: Path | None = None,
+    opportunity_id: str | None = None,
     submitted_text: str | None = None,
 ) -> dict[str, Any]:
     student, opportunity, result, candidates, evidence = build_synthetic(
-        scenario_path=scenario_path, html_path=html_path,
+        scenario_path=scenario_path,
+        html_path=html_path,
     )
     base: dict[str, Any] = {
         "fixture_only": True,
@@ -109,14 +131,19 @@ def run_stage(
         base["reasons"] = [asdict(item) for item in result.reasons]
     elif stage == "rank":
         base["ranked"] = [
-            {"id": item.opportunity.id, "priority_score": item.score,
-             "explanations": list(item.reasons)}
+            {
+                "id": item.opportunity.id,
+                "priority_score": item.score,
+                "explanations": list(item.reasons),
+            }
             for item in rank_eligible(student, [(opportunity, result)])
         ]
     elif stage == "draft":
         base["draft"] = draft_assistance(
-            "Explain your learning journey", evidence,
-            opportunity.ai_use_policy, MockLLM(),
+            "Explain your learning journey",
+            evidence,
+            opportunity.ai_use_policy,
+            MockLLM(),
         )
     elif stage == "review":
         text = submitted_text or "I practiced programming every day."
@@ -126,7 +153,11 @@ def run_stage(
     elif stage == "packet":
         draft = submitted_text or "I practiced programming every day."
         base["packet"] = application_packet(
-            evidence[0].student_id, opportunity.id, draft, evidence, opportunity.ai_use_policy,
+            evidence[0].student_id,
+            opportunity.id,
+            draft,
+            evidence,
+            opportunity.ai_use_policy,
         )
     elif stage == "demo":
         base["decision"] = result.decision.value
@@ -136,8 +167,10 @@ def run_stage(
             for item in rank_eligible(student, [(opportunity, result)])
         ]
         base["draft"] = draft_assistance(
-            "Explain your learning journey", evidence,
-            opportunity.ai_use_policy, MockLLM(),
+            "Explain your learning journey",
+            evidence,
+            opportunity.ai_use_policy,
+            MockLLM(),
         )
         base["review"] = list(review_claims(base["draft"], evidence).unsupported)
         base["submission_status"] = "NOT_SUBMITTED"

@@ -1,4 +1,5 @@
 """Permission-aware official-source acquisition with deterministic offline extraction."""
+
 from __future__ import annotations
 
 import json
@@ -87,8 +88,9 @@ def _candidate(
     quote = match.group(0)
     if quote not in snapshot.text:
         return None
-    return RuleCandidate(field, value, quote, snapshot.source_url,
-                         snapshot.content_hash, snapshot.retrieved_at)
+    return RuleCandidate(
+        field, value, quote, snapshot.source_url, snapshot.content_hash, snapshot.retrieved_at
+    )
 
 
 def extract_candidates(snapshot: SourceSnapshot) -> list[RuleCandidate]:
@@ -142,9 +144,8 @@ def deduplicate(awards: list[IndexedAward], threshold: float = 0.92) -> list[Ind
         if not any(
             normalize(award.provider) == normalize(existing.provider)
             and award.deadline == existing.deadline
-            and SequenceMatcher(
-                None, normalize(award.title), normalize(existing.title)
-            ).ratio() >= threshold
+            and SequenceMatcher(None, normalize(award.title), normalize(existing.title)).ratio()
+            >= threshold
             for existing in unique
         ):
             unique.append(award)
@@ -152,13 +153,17 @@ def deduplicate(awards: list[IndexedAward], threshold: float = 0.92) -> list[Ind
 
 
 def fetch_official(
-    connector: SourceConnector, *, cache_dir: Path, live: bool = False,
+    connector: SourceConnector,
+    *,
+    cache_dir: Path,
+    live: bool = False,
     min_interval_seconds: float = 2.0,
 ) -> SourceSnapshot:
     """Network is disabled by default. Fail closed if robots.txt is inaccessible."""
     url = connector.url
     if not authority_check(url) or urlsplit(url).hostname not in {
-        "www.pcc.edu", "www.oregonstudentaid.gov"
+        "www.pcc.edu",
+        "www.oregonstudentaid.gov",
     }:
         raise PermissionError("Only built-in official connectors may fetch")
     cache_dir.mkdir(parents=True, exist_ok=True)

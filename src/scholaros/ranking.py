@@ -1,4 +1,5 @@
 """Explainable priority heuristic; never an estimate of award probability."""
+
 from .eligibility import normalize
 from .models import Decision, EligibilityResult, Opportunity, RankedOpportunity, Student
 
@@ -23,12 +24,22 @@ def rank_eligible(
         permitted = {normalize(s) for s in opportunity.eligible_majors}
         fit = 100.0 if permitted and student_majors.intersection(permitted) else 65.0
         value = min(100.0, max(0.0, (opportunity.award_usd or 0) / 100.0))
-        ease = (50.0 if opportunity.effort_hours is None else
-                max(0.0, 100.0 - 10.0 * opportunity.effort_hours))
+        ease = (
+            50.0
+            if opportunity.effort_hours is None
+            else max(0.0, 100.0 - 10.0 * opportunity.effort_hours)
+        )
         score = (fit * fit_weight + value * value_weight + ease * ease_weight) / total
-        ranked.append(RankedOpportunity(
-            opportunity, round(score, 2),
-            (f"fit={fit:.0f}", f"value={value:.0f}", f"ease={ease:.0f}",
-             "priority score is not an admission probability"),
-        ))
+        ranked.append(
+            RankedOpportunity(
+                opportunity,
+                round(score, 2),
+                (
+                    f"fit={fit:.0f}",
+                    f"value={value:.0f}",
+                    f"ease={ease:.0f}",
+                    "priority score is not an admission probability",
+                ),
+            )
+        )
     return sorted(ranked, key=lambda x: (-x.score, x.opportunity.id))

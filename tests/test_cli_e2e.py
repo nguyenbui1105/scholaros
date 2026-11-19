@@ -11,7 +11,9 @@ from scholaros.workflow import build_synthetic, run_stage
 def invoke(*arguments: str) -> dict[str, object]:
     completed = subprocess.run(
         [sys.executable, "-m", "scholaros", *arguments, "--json"],
-        check=True, capture_output=True, text=True,
+        check=True,
+        capture_output=True,
+        text=True,
     )
     return json.loads(completed.stdout)
 

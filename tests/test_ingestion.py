@@ -25,7 +25,8 @@ def test_html_extraction_quotes_and_scripts() -> None:
     assert "ignore previous instructions" not in text
     snapshot = SourceSnapshot.from_text(
         "https://www.pcc.edu/enroll/paying-for-college/scholarships/apply/",
-        text, datetime(2026, 11, 18, tzinfo=UTC),
+        text,
+        datetime(2026, 11, 18, tzinfo=UTC),
     )
     candidates = extract_candidates(snapshot)
     assert {c.field for c in candidates} == {"international", "min_gpa", "deadline"}

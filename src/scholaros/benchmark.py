@@ -1,4 +1,5 @@
 """Labeled synthetic eligibility and unsupported-claim benchmark."""
+
 from __future__ import annotations
 
 import csv
@@ -38,7 +39,9 @@ def evaluate(path: Path | None = None) -> dict[str, float | int]:
     for row in cases:
         person, award, _, _, _ = build_synthetic()
         modified = _change_student(person, row["field"], row["value"])
-        predicted = assess_eligibility(modified, award, today=award.verified_on or date.today()).decision
+        predicted = assess_eligibility(
+            modified, award, today=award.verified_on or date.today()
+        ).decision
         gold = Decision(row["expected"])
         if predicted is gold:
             correct += 1
@@ -50,14 +53,16 @@ def evaluate(path: Path | None = None) -> dict[str, float | int]:
             fn += 1
         else:
             tn += 1
-    evidence = [EvidenceItem(
-        id="supported", student_id="synthetic", confirmed_by_student=True,
-        statement="I practiced programming every day.",
-    )]
+    evidence = [
+        EvidenceItem(
+            id="supported",
+            student_id="synthetic",
+            confirmed_by_student=True,
+            statement="I practiced programming every day.",
+        )
+    ]
     unsupported = [f"I received fictional award number {i}." for i in range(10)]
-    detected = sum(
-        not review_claims(statement, evidence).is_clean for statement in unsupported
-    )
+    detected = sum(not review_claims(statement, evidence).is_clean for statement in unsupported)
     return {
         "pairs": len(cases),
         "exact_state_accuracy": round(correct / len(cases), 4),
@@ -65,7 +70,10 @@ def evaluate(path: Path | None = None) -> dict[str, float | int]:
         "eligible_recall": round(tp / (tp + fn), 4) if tp + fn else 0.0,
         "false_eligible_rate": round(fp / (fp + tn), 4) if fp + tn else 0.0,
         "unsupported_claim_detection_rate": round(detected / len(unsupported), 4),
-        "tp": tp, "fp": fp, "fn": fn, "tn": tn,
+        "tp": tp,
+        "fp": fp,
+        "fn": fn,
+        "tn": tn,
     }
 
 

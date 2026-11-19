@@ -1,4 +1,5 @@
 """Deterministic effort-budget optimizer for already eligible ranked opportunities."""
+
 from __future__ import annotations
 
 from .models import RankedOpportunity

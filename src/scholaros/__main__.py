@@ -1,4 +1,5 @@
 """ScholarOS CLI: offline fictional-data workflows and local vault operations."""
+
 from __future__ import annotations
 
 import argparse
@@ -51,7 +52,9 @@ def main() -> None:
             result = {"student_id": args.student_id, "deleted": count}
         else:
             result = run_stage(
-                args.command, scenario_path=args.scenario, html_path=args.fixture,
+                args.command,
+                scenario_path=args.scenario,
+                html_path=args.fixture,
                 opportunity_id=getattr(args, "opportunity_id", None),
                 submitted_text=getattr(args, "text", None),
             )
