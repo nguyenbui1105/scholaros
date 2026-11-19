@@ -1,59 +1,46 @@
 <div align="center">
 
-<img src="assets/scholaros-banner.svg" alt="ScholarOS — Evidence-first scholarship intelligence" width="100%" />
+<img src="assets/scholaros-banner.svg" width="100%" alt="ScholarOS — evidence-first scholarship research" />
 
 # ScholarOS
 
-**Turn your real story into a stronger scholarship strategy.**
+**Evidence-first eligibility and application engine with skill contracts.**
 
-An open-source, evidence-first AI skill system for scholarship discovery, eligibility verification, authentic writing support, and application tracking — designed with international students in the U.S. in mind.
+*An open-source, offline-tested Python toolkit for conservative scholarship rule matching, sourced rule candidates, responsible essay assistance and application-packet preparation.*
 
 [![CI](https://github.com/nguyenbui1105/scholaros/actions/workflows/ci.yml/badge.svg)](https://github.com/nguyenbui1105/scholaros/actions/workflows/ci.yml)
-[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-22c55e.svg)](LICENSE)
-[![Status: Alpha](https://img.shields.io/badge/status-research%20alpha-f59e0b)](docs/ROADMAP.md)
-[![Skills: 20](https://img.shields.io/badge/skills-20-8b5cf6)](skills/README.md)
+[![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12-3776AB?logo=python&logoColor=white)](pyproject.toml)
+[![Version](https://img.shields.io/badge/version-0.2.0-6366f1)](CHANGELOG.md)
+[![License: MIT](https://img.shields.io/badge/license-MIT-22c55e.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/status-offline%20beta-f59e0b)](docs/STATUS.md)
 
-[Quickstart](#-quickstart) · [Architecture](docs/ARCHITECTURE.md) · [Skill Catalog](skills/README.md) · [RFC](docs/RFC-0001.md) · [Roadmap](docs/ROADMAP.md) · [Contributing](CONTRIBUTING.md)
+[Quickstart](#-quickstart) · [Architecture](docs/ARCHITECTURE.md) · [Skills](skills/README.md) · [Status](docs/STATUS.md) · [Evaluation](docs/EVALUATION.md) · [Safety](docs/SAFETY.md)
 
 </div>
 
----
-
 > [!IMPORTANT]
-> **ScholarOS is an early-stage research/engineering foundation, not a live scholarship search engine, deployed SaaS, or autonomous submission bot.** The included demo uses fictional opportunities. Always confirm current eligibility and deadlines on official sources. Scholarship providers may restrict AI-assisted writing or automation.
+> **Research/developer beta, not a production scholarship recommender.** The end-to-end walkthrough uses **fictional student and scholarship fixtures**. Although connector configurations point to two real institutional pages, live fetching and their current eligibility policies have not been validated end-to-end. Do not use this repository to claim eligibility, auto-submit applications, or store real student records in a deployed service.
 
-## ✨ What makes ScholarOS different?
+## ✨ Implemented and tested
 
-| Typical workflow | ScholarOS direction |
-| --- | --- |
-| Keyword matching | Documented eligibility decisions with explicit unknowns |
-| Generic AI essays | Story bank grounded in verified personal evidence |
-| More applications at any cost | Fit, effort, value, deadline and verification-aware prioritization |
-| One giant prompt | 20 independently specified skills with testable contracts |
-| Silent form submission | Policy gates, user review and audit trails |
-| Hype-driven success rates | Measurable quality metrics, no fabricated win probabilities |
+| Capability | Implementation | Confidence / scope |
+| --- | --- | --- |
+| Four-state eligibility | Normalized constraints; unknown ≠ eligible; typed reasons | Tested on synthetic records |
+| Source-backed claims | HTTPS/domain screen, snapshot hash, verbatim quotes and value matching | Test fixture only; domain allowlist is **not** authenticity proof |
+| Ingestion | HTML-to-text, deterministic rule candidates, quote validation | Recorded HTML tests; real fetching opt-in and untested |
+| Source utilities | Freshness and award deduplication | Tested |
+| Ranking | Eligible-only, explainable fit/value/ease score and effort budget | Heuristics, **not award probabilities** |
+| Policy-aware writing | No writing when forbidden/unknown, disclosure gate, deterministic mock | Tested without API keys |
+| Evidence review | Literal sentence-to-confirmed-evidence matching; rubric/voice diagnostics | Conservative; not semantic fact verification |
+| Local storage | SQLite migration, opt-in encrypted student vault, purge command | Tested locally; not production PII security |
+| CLI | `init ingest match rank explain draft review packet purge demo schemas` | Offline synthetic e2e tested |
+| Skills | 20 machine-readable SKILL.md contracts | **9 tested limited, 11 specified**, not 20 autonomous agents |
 
-## 🧭 System map
-
-```mermaid
-flowchart TD
-  A["Student story & documents"] --> B["Private evidence vault"]
-  C["Official scholarship sources"] --> D["Source verification"]
-  B --> E["Policy-aware orchestrator"]
-  D --> E
-  E --> F["Eligibility engine"]
-  F --> G{"Verified eligible?"}
-  G -- No / Unknown --> H["Exclude or human review"]
-  G -- Yes --> I["Deterministic fit ranking"]
-  I --> J["Narrative / writing coach"]
-  J --> K["Independent evidence & policy review"]
-  K --> L["Student approval"]
-  L --> M["Application-ready packet"]
-  M --> N["Tracking and outcomes"]
-```
+See [precise status](docs/STATUS.md). A real optional OpenAI SDK adapter exists but has **no live integration test**.
 
 ## 🚀 Quickstart
+
+Requires Python 3.11+.
 
 ```bash
 git clone https://github.com/nguyenbui1105/scholaros.git
@@ -62,63 +49,95 @@ python -m venv .venv
 # macOS/Linux: source .venv/bin/activate
 # Windows PowerShell: .venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
-python -m scholaros demo
+scholaros demo --json
 python -m pytest -q
 ```
 
-The demo runs **offline**, using synthetic data and **no LLM API keys**. It demonstrates four-valued eligibility, gated ranking, and explanation output. No user's private data is checked into this repository.
+Example values from the **fictional offline demo**:
 
-## 🧠 Skill-first architecture
-
-The [20-skill catalog](skills/README.md) spans six workflows:
-
-1. **Student intelligence** — profile ingestion, story interviews, achievements, evidence verification
-2. **Research** — opportunity discovery, eligibility, source freshness, deduplication
-3. **Strategy** — fit ranking, effort/value optimization, narrative angle selection
-4. **Writing** — outline, permission-aware assistance, voice preservation, rubric review
-5. **Operations** — document readiness, permitted form prefill, submission readiness
-6. **Evaluation** — outcomes, experiments
-
-Every skill has a `SKILL.md` defining purpose, inputs, outputs, invariants, failure handling and acceptance checks. **Specifications are not claims that every workflow is implemented.** See [implementation status](docs/STATUS.md).
-
-## 🔒 Non-negotiable guardrails
-
-- Never invent eligibility, award dates, award probabilities, personal achievements, or citations.
-- An **unknown** requirement is not equivalent to eligible.
-- Writing behavior is constrained by each scholarship's **AI-use policy**; unknown does not mean permission.
-- No application submission without explicit student approval and verified portal permission.
-- No CAPTCHA bypass, anti-bot circumvention, or password harvesting.
-- Store only the minimum personal data needed; never commit a real applicant's private records.
-
-See [Safety & Privacy](docs/SAFETY.md) and [Threat Model](docs/THREAT_MODEL.md).
-
-## 🛠 Repository contents
-
-```text
-src/scholaros/         Offline Python reference engine + CLI
-skills/                20 agent-skill specifications
-tests/                 Deterministic regression tests
-examples/              Fictional, non-personal demo data
-docs/                  RFC, architecture, ADRs, roadmap, evaluation, security
-assets/                Original SVG cover art
-.github/               CI, issue and PR templates
+```json
+{
+  "fixture_only": true,
+  "student_id": "synthetic-student",
+  "opportunity_id": "fictional-stem-award",
+  "decision": "eligible",
+  "ranked": [{"id": "fictional-stem-award", "score": 72.5}],
+  "draft": "I practiced programming every day.",
+  "review": [],
+  "submission_status": "NOT_SUBMITTED"
+}
 ```
 
-## 🗺 Roadmap
+The full JSON also contains typed reason codes. `eligible` here means only that **all encoded synthetic fixture conditions** were satisfied, not that the student qualifies for a real scholarship.
 
-- **Now:** verifiable contracts, deterministic eligibility/ranking, synthetic tests, safety foundation.
-- **Next:** official-source ingestion with provenance, student story vault, isolated reviewer evaluation.
-- **Later:** dashboard, secure storage, permission-aware form preparation, optional human-approved automations.
-- **Only after validation:** pilots and potential SaaS offering.
+## 🔎 Explore each stage
 
-Follow [the full roadmap](docs/ROADMAP.md) and [contribute](CONTRIBUTING.md).
+```bash
+scholaros ingest --json
+scholaros match --json
+scholaros rank --json
+scholaros explain fictional-stem-award --json
+scholaros draft --json
+scholaros review --text "I won a Nobel Prize." --json
+scholaros packet --json
+scholaros schemas --out docs/schemas
+scholaros init --db .scholaros/scholaros.db
+scholaros purge synthetic-student --db .scholaros/scholaros.db --json
+```
 
-## 🤝 Contributions
+The default input is `examples/synthetic_student.json` and `examples/synthetic_scholarship.html`. CLI ingestion is offline-fixture-based, **not real provider crawling**. A separate Python connector API supports explicit opt-in live fetching with robots.txt checks, rate limiting and local cache; its live behavior is not yet independently verified. All external scholarship terms require human review.
 
-Contributions welcome: eligibility edge cases, tests with **synthetic records**, source verification approaches, accessible UI prototypes and scholarly evaluation methods. Read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+The vault refuses storing PII unless consent is provided and `SCHOLAROS_FERNET_KEY` is set (or an explicitly insecure local-only override is set). Do not put keys or real transcripts in git.
 
-## 📜 License
+## 🧩 Architecture
 
-MIT — see [LICENSE](LICENSE). No affiliation with scholarship providers; no financial-aid, immigration or legal advice. An award is never guaranteed.
+```mermaid
+flowchart TD
+    A["Student and synthetic source fixture"] --> B["HTML extraction + snapshot hash"]
+    B --> C["Quoted rule candidates"]
+    C --> D["Eligibility: ELIGIBLE / INELIGIBLE / UNKNOWN / NEEDS_VERIFICATION"]
+    D --> E{"Verified eligible?"}
+    E -- No --> F["Explain / human-review queue"]
+    E -- Yes --> G["Explainable ranking + effort portfolio"]
+    G --> H["Policy-gated mock or optional LLM writing"]
+    H --> I["Literal evidence review + packet"]
+    I --> J["Student review; NOT SUBMITTED"]
+```
 
-<div align="center"><sub>Built for students with real potential and stories worth telling. 🌱</sub></div>
+The actual code is in `src/scholaros/`. [Architecture](docs/ARCHITECTURE.md) describes trust boundaries; [RFC](docs/RFC-0001.md) describes future ambitions, not completed components.
+
+## 🛡 Core safeguards
+
+- Never infer missing visa, school, major, GPA, or source claims as an eligibility mismatch.
+- Verified mismatches and all simultaneous unknown reasons are reported separately.
+- Source quotes must match the encoded rule values; caller metadata alone is not independent proof.
+- AI-use policy `unknown` and `prohibited` fail closed. Disclosure-required has an explicit checkpoint.
+- AI can **only prepare** an application packet. This beta has no portal auto-submit or CAPTCHA bypass.
+- Avoid storing real student PII in the current prototype; no guarantee of secure backup-level erasure.
+- **No legal, immigration, or financial-aid advice. Awards are never guaranteed.**
+
+## 🧪 Reproducibility
+
+```bash
+ruff check src tests
+mypy --strict src/
+pytest -q --cov=scholaros --cov-report=term-missing
+python -m scholaros.benchmark
+python scripts/verify_skills.py
+```
+
+A 36-pair labeled **synthetic** benchmark asserts zero false-ELIGIBLE predictions and full literal unsupported-claim detection on simple injected statements. Read [evaluation and limitations](docs/EVALUATION.md) before interpreting any numbers.
+
+## 🛣 Next steps
+
+Provenance-backed real institutional validation; per-provider policy verification; broader adjudicated benchmarks; encrypted, access-controlled student vault; human-centered editing UI and permissions-aware application preparation. **No autonomous submission or success-rate promises.**
+
+[Roadmap](docs/ROADMAP.md) · [Decisions](docs/DECISIONS.md) · [Upgrade plan](docs/UPGRADE_PLAN.md)
+
+## 🤝 Contributing
+
+Contributions welcome: official-source rule fixtures where redistribution is permitted, falsification/ambiguity tests, accessibility improvements, scholarly evaluation, privacy/security controls. Do **not** commit real applicant records.
+
+[Contributing guide](CONTRIBUTING.md) · [Security](SECURITY.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [MIT license](LICENSE)
+
+<div align="center"><sub>Built to amplify authentic student stories—not invent better ones. 🌱</sub></div>
