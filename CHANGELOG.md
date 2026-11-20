@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] — v0.3.1 real-source evaluation infrastructure
+
+- Added same-origin scholarship URL discovery, exact HTTPS/host restrictions and operator-approved, robots-aware bounded collection.
+- Added offline SHA-256 snapshot audit with deduplication and explicit separation of URLs, snapshots, and verified sources.
+- Added independent two-reviewer evidence-linked annotations and third-party conflict adjudication without model predictions.
+- Added metrics for eligible precision/recall, false-ELIGIBLE, abstentions, decision coverage, confusion counts and undefined denominators.
+- Added measured offline ingest/extract/match p50/p95 timing and sequential throughput; optional estimated LLM costs require measured token usage and explicitly supplied prices.
+- Added offline tests and CLI workflows. The 50–100 real licensed-page collection, blind human annotation campaign and real-world performance scores **are not yet delivered**.
+
+
 ## [Unreleased] — v0.3 source research slice
 
 - Added `scholaros research pcc|osac` read-only CLI with offline cache and explicit `--allow-network` switch.

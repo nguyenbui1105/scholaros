@@ -26,3 +26,7 @@ The reference evaluator supports only finite GPA values on a **0.0–4.0 scale**
 
 ## D-009 — v0.3 program-level discovery safety (2026-11-19)
 The two configured public pages [PCC Foundation scholarships](https://www.pcc.edu/enroll/paying-for-college/scholarships/apply/) and [OSAC Scholarship Application](https://www.oregonstudentaid.gov/scholarships/osac-scholarship-application/) are *application program landing pages*. A program page does not constitute individual scholarship criteria, international/F-1 permission, AI-use terms, or award-specific deadlines. A quote match does not promote source content to eligible. Source research returns `needs_verification` for both providers, `verified_awards=0` and an explicit review queue. Cache content is **never trusted merely because its hash is internally consistent**. Network access is opt-in, subject to robots.txt and normal provider terms. The documented URLs were checked by public search; actual production fetch permissions and published details must be revalidated by the operator.
+
+
+## D-010 — Independent real-world evaluation (2026-11-19)
+See [the evaluation specification](V031_EVALUATION.md) and [decision record](DECISIONS_V031.md). Do not claim 50 official pages based on catalog entries, or claim real accuracy from synthetic fixtures. Human source permission review and independent double-labeling are separate from URL discovery, robots permission, code-generated annotations and model decisions. Missing real gold must render metrics null; actual LLM pricing and latency remain unknown until measured.

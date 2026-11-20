@@ -13,6 +13,11 @@
 | Offline JSON CLI (`init`, `ingest`, `match`, `rank`, `explain`, `draft`, `review`, `packet`, `purge`, `demo`, `schemas`) | Tested | `test_cli_e2e.py` |
 | 20 skill contracts | 9 limited tested, 11 specified | `test_skill_contracts.py` |
 | Synthetic adversarial benchmark (83 pairs) | Test-asserted | `test_benchmark.py` |
+| v0.3.1 source URL discovery and 50–100-page *permission-gated* collector | Implemented; network collection **not executed** | `collection.py`, `test_collector_v031.py` |
+| Two-reviewer source-linked annotation and adjudicated metrics | Implemented; real labels **not collected** | `evaluation.py`, `test_evaluation_v031.py` |
+| Ingest/extract/match offline p50/p95 and throughput CLI | Implemented; synthetic offline only | `performance.py`, `evaluation_cli.py`, `test_timing_v031.py` |
+| LLM API cost measurement | Formula implemented for observed usage + operator-provided rates; live cost unmeasured | `performance.py` |
+| 50–100 real official snapshots and blind double-reviewed cases | **Not completed / cannot claim measured accuracy** | `docs/V031_EVALUATION.md` |
 | Real-world scholarship eligibility or confirmed provider AI policies | Not implemented; v0.3 never marks a program-level candidate eligible | N/A |
 | Live portal integrations / automatic submissions | Not implemented | N/A |
 | Web dashboard / SaaS authentication | Not implemented | N/A |
@@ -34,3 +39,12 @@ CI enforces Ruff lint/format, mypy --strict on src/, Python 3.11/3.12, pytest >=
 - Hardening benchmark has **83 independently labeled fictional cases** (16 eligible positives; 67 others), **0 false-ELIGIBLE** and **20/20 literal unsupported claims detected**. Gate: zero false-ELIGIBLE and >=95% unsupported-claim recall. All figures are fixture-only.
 - Gitleaks and dependency-audit jobs passed on the hardened build.
 - v0.2.0 was released; subsequent hardening changes are unreleased until separately tagged.
+
+
+## v0.3.1 status (unreleased evaluation infrastructure)
+- 11 discovered official institutional source URLs are documented as **unreviewed candidates**, not 11 validated pages. No provider terms/robots permission is claimed.
+- A bounded, opt-in 50–100-page local corpus collector and source audit exist; no such 50–100-page actual live corpus has been collected here. Do not quote synthetic fixture sizes as real.
+- A human double-label and third-adjudicator pipeline enforces source SHA-256, verbatim evidence quotes and independent reviewer identities; **no real human labels exist in the repository**.
+- Real-world precision, recall, false-ELIGIBLE rate, UNKNOWN/NEEDS_VERIFICATION rates, live p95 latency, throughput and API costs are therefore **unmeasured**, not 100%.
+- Offline synthetic stage timing is available via `scholaros perf`; quantitative results should be reported with run/environment context after CI.
+- The v0.2.0 release tag is unchanged; these are unreleased main/feature branch changes until independently accepted.

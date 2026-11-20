@@ -20,6 +20,17 @@
 - [ ] Real permission/robots validation end-to-end for current live websites
 - [ ] Individual award catalog, per-award authoritative rule adjudication
 
+## v0.3.1 — independent evaluation tooling (implemented; real-world study pending)
+- [x] Public candidate URL registry (11 discoverable institutional URLs, not validated snapshots)
+- [x] Permission-gated 50–100-page bounded collector and offline SHA-256 audit
+- [x] Two-reviewer evidence-anchored annotation model and conflict-safe adjudication
+- [x] Metrics with abstentions and null when real-world labels are missing
+- [x] Offline stage p50/p95, throughput, explicit-cost calculator
+- [ ] Collect >=50 distinct, terms/robots-checked official pages and document permitted reuse
+- [ ] Two blinded independent reviewers per scored case and adjudication for conflicts
+- [ ] Run held-out real-source matching accuracy and report confidence intervals
+- [ ] Measure live network and LLM latency/throughput/cost using actual usage
+
 ## Next — grounded public-source beta
 - [ ] Independent real-source authority/permission validation and repeatable robots compliance
 - [ ] Manually adjudicated eligibility cases from multiple providers (F-1, citizenship, enrollment conditions)

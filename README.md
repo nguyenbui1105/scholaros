@@ -123,6 +123,25 @@ scholaros research osac --allow-network --cache-dir .scholaros/cache --json
 
 Live URLs and site permission must be checked before using this workflow. Offline cache content, even if it has a matching hash, is **untrusted**; output is always `needs_verification`, `verified_awards=0`, and `NOT_SUBMITTED`. No student records are needed or saved. See [source research guide](docs/RESEARCH_V03.md).
 
+## 📊 v0.3.1 evaluation tooling (unreleased)
+
+An **audit-first evaluation pipeline** has been implemented: source candidate discovery, permission-gated collection of **50–100 pages**, independent human annotation contracts, abstention-aware eligibility precision/recall, and offline latency and throughput benchmarking.
+
+```bash
+# Deterministic, no network, measures ingest/extract/match stage times
+scholaros perf --repetitions 100 --json
+
+# From a previously saved public HTML index, discover unapproved candidate links
+scholaros discover --base-url https://onsa.asu.edu/scholarships \
+  --html ./index.html --out ./candidate-manifest.json --json
+
+# Separate, independently adjudicated gold labels from model predictions
+scholaros eval-real --annotations ./annotations.jsonl \
+  --predictions ./predictions.jsonl --snapshots ./snapshots --json
+```
+
+**Crucial scope:** 11 official institutional URL *candidates* are listed in the starter manifest. **No 50–100-page collection has been verified**, no independent real-world gold annotation set exists, and therefore **real-world accuracy, recall, and LLM costs are not yet measured**. These metrics remain undefined rather than silently reusing synthetic results. See [full evaluation protocol](docs/V031_EVALUATION.md) and [status](docs/STATUS.md).
+
 ## 🛡 Core safeguards
 
 - Never infer missing visa, school, major, GPA, or source claims as an eligibility mismatch.

@@ -43,3 +43,7 @@ pytest -q tests/test_benchmark.py tests/test_eligibility_regressions.py
 ## Limitations
 
 Golden labels use a synthetic scenario and do not assess correctness against external sources. Quote-level negation detection is conservative and does not parse full legal clauses. GPA conversion across non-US scales, provider-local timezone discovery, real domain ownership confirmation, linguistic paraphrase entailment and real provider rule extraction remain out of scope. Do not extrapolate these scores to acceptance probability or provider eligibility.
+
+
+## Real-world evaluation extension (v0.3.1)
+Read [V031_EVALUATION.md](V031_EVALUATION.md). The previous 83-case synthetic benchmark remains unchanged and cannot be presented as a real-world field test. The new evaluator requires source snapshots, two independent blinded human reviewers (and third-party adjudication for disagreements), and independent model predictions. Without these it reports **undefined denominators** and no real-world accuracy. Collection of 50–100 authorized pages is a **future measurable gate**, not an accomplished dataset.
