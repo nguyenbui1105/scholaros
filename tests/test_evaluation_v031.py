@@ -119,7 +119,7 @@ def test_missing_prediction_counts_as_abstention() -> None:
 def test_false_eligible_is_measured() -> None:
     source = snapshot().text.replace("F-1 students may apply", "F-1 students are ineligible")
     negative_snapshot = SourceSnapshot.from_text(URL, source, DATE)
-    neg = label("a", decision="ineligible").model_copy(
+    neg = label("a").model_copy(
         update={
             "content_hash": negative_snapshot.content_hash,
             "field_labels": {**label("a").field_labels, "visa": "ineligible"},
