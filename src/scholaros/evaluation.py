@@ -126,7 +126,7 @@ def adjudicate(
             and first.content_hash == second.content_hash
         )
         chosen = first
-        reviewers = (first.reviewer_id, second.reviewer_id)
+        reviewers: tuple[str, ...] = (first.reviewer_id, second.reviewer_id)
         if not agreement:
             third = (resolutions or {}).get(case_id)
             if third is None or third.reviewer_id in reviewers:
