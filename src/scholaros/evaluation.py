@@ -77,6 +77,8 @@ class AdjudicatedCase(BaseModel):
 
 def validate_annotation(annotation: Annotation, snapshot: SourceSnapshot) -> bool:
     """Fail closed when a known field has no exact supporting source excerpt."""
+    # model_copy(update=...) bypasses Pydantic validation; revalidate on trust boundary.
+    Annotation.model_validate(annotation.model_dump())
     if sha256(snapshot.text.encode("utf-8")).hexdigest() != snapshot.content_hash:
         raise ValueError("Snapshot hash does not match text")
     if (
