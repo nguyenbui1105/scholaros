@@ -1,0 +1,42 @@
+{
+  "fixture_only": true,
+  "warning": "All records are fabricated for demonstration. Never use this as a live award catalog.",
+  "opportunities": [
+    {
+      "id": "fictional-stem",
+      "title": "FICTIONAL STEM Scholarship — DEMO ONLY",
+      "source_url": "https://demo.edu/fictional",
+      "source_text": "Undergraduate students are eligible. F-1 students are eligible. Computer science majors are eligible. Demo College students are eligible. Minimum GPA 3.0. Deadline: 2027-12-31. AI-assisted drafting is permitted.",
+      "verified_on": "2026-11-20",
+      "reviewer_id": "synthetic-fixture-reviewer",
+      "eligible_levels": [
+        "undergraduate"
+      ],
+      "eligible_visas": [
+        "F-1"
+      ],
+      "eligible_majors": [
+        "computer science"
+      ],
+      "allowed_schools": [
+        "Demo College"
+      ],
+      "min_gpa": 3,
+      "deadline": "2027-12-31",
+      "rule_quotes": {
+        "academic_level": "Undergraduate students are eligible",
+        "visa_status": "F-1 students are eligible",
+        "majors": "Computer science majors are eligible",
+        "school": "Demo College students are eligible",
+        "gpa": "Minimum GPA 3.0",
+        "deadline": "Deadline: 2027-12-31"
+      },
+      "international_quote": "F-1 students are eligible",
+      "ai_use_policy": "assistance_allowed",
+      "ai_policy_quote": "AI-assisted drafting is permitted.",
+      "other_requirements_reviewed": true,
+      "award_usd": 2500,
+      "effort_hours": 3
+    }
+  ]
+}
