@@ -31,6 +31,8 @@ jobs:
         run: pytest -q --cov=scholaros --cov-report=term-missing --cov-fail-under=85
       - name: Labeled synthetic benchmark
         run: python -m scholaros.benchmark
+      - name: Offline ingest/extract/match p50-p95 benchmark
+        run: python -m scholaros perf --repetitions 100 --json
       - name: End-to-end synthetic demo
         run: python -m scholaros demo --json
   dependency-audit:
