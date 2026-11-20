@@ -8,6 +8,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .evaluation_cli import (
+    audit_offline_dir,
+    benchmark_offline,
+    collect_from_manifest,
+    discover_from_saved_html,
+    evaluate_files,
+)
 from .research import research_provider
 from .storage import connect, export_schemas, purge_student
 from .workflow import run_stage
@@ -37,6 +44,34 @@ def main() -> None:
         "--allow-network", action="store_true", help="Opt-in robots-aware official fetch"
     )
     research.add_argument("--db", type=Path, help="Optional local public-source SQLite store")
+    evaluation = sub.add_parser("eval-real", help="Evaluate independently adjudicated records")
+    evaluation.add_argument("--annotations", type=Path, required=True)
+    evaluation.add_argument("--predictions", type=Path, required=True)
+    evaluation.add_argument("--snapshots", type=Path, required=True)
+    evaluation.add_argument("--resolutions", type=Path)
+    evaluation.add_argument("--json", action="store_true")
+    performance = sub.add_parser("perf", help="Benchmark synthetic offline pipeline timings")
+    performance.add_argument("--repetitions", type=int, default=100)
+    performance.add_argument("--input-tokens", type=int)
+    performance.add_argument("--output-tokens", type=int)
+    performance.add_argument("--input-rate", type=float)
+    performance.add_argument("--output-rate", type=float)
+    performance.add_argument("--json", action="store_true")
+    discover = sub.add_parser("discover", help="Extract unreviewed URLs from saved public HTML")
+    discover.add_argument("--base-url", required=True)
+    discover.add_argument("--html", type=Path, required=True)
+    discover.add_argument("--out", type=Path, required=True)
+    discover.add_argument("--json", action="store_true")
+    collect = sub.add_parser("collect", help="Opt-in provider-authorized 50–100 page snapshot job")
+    collect.add_argument("--manifest", type=Path, required=True)
+    collect.add_argument("--cache-dir", type=Path, required=True)
+    collect.add_argument("--allow-network", action="store_true")
+    collect.add_argument("--min-pages", type=int, default=50)
+    collect.add_argument("--json", action="store_true")
+    audit = sub.add_parser("audit-corpus", help="Validate locally stored snapshots (no network)")
+    audit.add_argument("--snapshots", type=Path, required=True)
+    audit.add_argument("--min-pages", type=int, default=50)
+    audit.add_argument("--json", action="store_true")
     init = sub.add_parser("init")
     init.add_argument("--json", action="store_true")
     init.add_argument("--db", type=Path, default=Path(".scholaros/scholaros.db"))
@@ -64,6 +99,28 @@ def main() -> None:
                 live=args.allow_network,
                 database=args.db,
             )
+        elif args.command == "eval-real":
+            result = evaluate_files(
+                args.annotations, args.predictions, args.snapshots,
+                resolutions_path=args.resolutions,
+            )
+        elif args.command == "perf":
+            result = benchmark_offline(
+                repetitions=args.repetitions,
+                input_tokens=args.input_tokens,
+                output_tokens=args.output_tokens,
+                input_rate=args.input_rate,
+                output_rate=args.output_rate,
+            )
+        elif args.command == "discover":
+            result = discover_from_saved_html(args.base_url, args.html, args.out)
+        elif args.command == "collect":
+            result = collect_from_manifest(
+                args.manifest, args.cache_dir,
+                allow_network=args.allow_network, min_pages=args.min_pages,
+            )
+        elif args.command == "audit-corpus":
+            result = audit_offline_dir(args.snapshots, min_pages=args.min_pages)
         elif args.command == "purge":
             with connect(args.db) as db:
                 count = purge_student(db, args.student_id)
