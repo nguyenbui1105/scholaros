@@ -1,6 +1,5 @@
 """Test-first guardrails for the assisted scholarship application workspace."""
 
-from dataclasses import replace
 from datetime import date
 from pathlib import Path
 
@@ -62,6 +61,7 @@ def award(*, reviewed: bool = True, policy: AIUsePolicy = AIUsePolicy.UNKNOWN
         eligible_majors=["computer science"], allowed_schools=["Demo College"],
         min_gpa=3.0, deadline=date(2027, 12, 31),
         rule_quotes=QUOTES, international_quote=QUOTES["visa_status"],
+        other_requirements_reviewed=True,
         ai_use_policy=policy,
         ai_policy_quote=("AI-assisted drafting is permitted."
                          if policy is AIUsePolicy.ASSISTANCE_ALLOWED else None),
