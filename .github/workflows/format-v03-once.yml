@@ -1,0 +1,33 @@
+name: v0.3 one-time formatting
+on:
+  push:
+    paths:
+      - ".github/workflows/format-v03-once.yml"
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.ref == 'refs/heads/feat/v0.3-source-research'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/v0.3-source-research
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install ruff==0.17.5
+      - name: Fix lint and format
+        run: |
+          ruff check --fix src tests
+          ruff format src tests
+      - name: Commit formatting only if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src tests
+          if ! git diff --cached --quiet; then
+            git commit -m "style(v0.3): Ruff-format source research code and tests"
+            git push origin HEAD:feat/v0.3-source-research
+          fi
