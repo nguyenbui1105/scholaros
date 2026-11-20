@@ -26,11 +26,6 @@ from .models import Decision
 from .records import SourceSnapshot
 from .storage import connect
 
-_PROVIDER_TYPES: dict[str, type[PCCFoundationConnector] | type[OregonStudentAidConnector]] = {
-    "pcc": PCCFoundationConnector,
-    "osac": OregonStudentAidConnector,
-}
-
 _MANUAL_REVIEWS = (
     "Individual scholarship and award-cycle requirements are unverified",
     "International/F-1 eligibility must be confirmed per individual award",
@@ -69,10 +64,11 @@ class ResearchReport:
 
 
 def provider_connector(provider: str) -> SourceConnector:
-    provider_type = _PROVIDER_TYPES.get(provider)
-    if provider_type is None:
-        raise ValueError(f"Unknown provider {provider!r}; select pcc or osac")
-    return provider_type()
+    if provider == "pcc":
+        return PCCFoundationConnector()
+    if provider == "osac":
+        return OregonStudentAidConnector()
+    raise ValueError(f"Unknown provider {provider!r}; select pcc or osac")
 
 
 def analyze_snapshot(
