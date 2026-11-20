@@ -256,6 +256,23 @@ def create_workspace(
                 "Upload required documents to the official provider portal",
                 "Applicant explicitly approves the final exact packet and destination",
             ],
+            "prefill_fields": {
+                "academic_level": applicant.student.academic_level,
+                "visa_status": applicant.student.visa_status,
+                "school": applicant.student.school,
+                "majors": list(applicant.student.majors),
+                "gpa": applicant.student.gpa,
+            },
+            "missing_fields": [
+                field for field, value in {
+                    "academic_level": applicant.student.academic_level,
+                    "visa_status": applicant.student.visa_status,
+                    "school": applicant.student.school,
+                    "majors": applicant.student.majors,
+                    "gpa": applicant.student.gpa,
+                }.items() if value is None or value == "" or value == ()
+            ],
+            "packet_state": "DRAFT_REQUIRES_STUDENT_REVIEW",
             "approved": False,
             "submission_status": "NOT_SUBMITTED",
         }
