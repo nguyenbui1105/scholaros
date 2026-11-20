@@ -33,6 +33,12 @@ jobs:
         run: python -m scholaros.benchmark
       - name: Offline ingest/extract/match p50-p95 benchmark
         run: python -m scholaros perf --repetitions 100 --json
+      - name: Encrypted applicant agent-workspace smoke test
+        run: |
+          export SCHOLAROS_FERNET_KEY="$(python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')"
+          scholaros onboard --profile-json examples/agent_demo_profile.json --out .scholaros/profile.enc --json
+          scholaros autopilot --catalog examples/agent_demo_catalog.json --today 2026-11-20 --json
+          scholaros workspace --json
       - name: End-to-end synthetic demo
         run: python -m scholaros demo --json
   dependency-audit:
