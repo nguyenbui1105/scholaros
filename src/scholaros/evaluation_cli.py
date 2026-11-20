@@ -47,9 +47,7 @@ def evaluate_files(
     Annotators work from source snapshots independently; predictions are loaded
     only *after* the gold consensus has been checked.
     """
-    annotations = [
-        Annotation.model_validate(record) for record in _read_lines(annotations_path)
-    ]
+    annotations = [Annotation.model_validate(record) for record in _read_lines(annotations_path)]
     ids = {item.case_id for item in annotations}
     snapshots = {
         case_id: SourceSnapshot.model_validate_json(
@@ -63,9 +61,7 @@ def evaluate_files(
         else None
     )
     consensus = adjudicate(annotations, snapshots, resolutions=resolutions)
-    predictions = [
-        Prediction.model_validate(record) for record in _read_lines(predictions_path)
-    ]
+    predictions = [Prediction.model_validate(record) for record in _read_lines(predictions_path)]
     result = evaluate_predictions(consensus, predictions)
     result["n_annotation_records"] = len(annotations)
     result["n_cases_with_source"] = len(snapshots)
@@ -100,8 +96,10 @@ def benchmark_offline(
     result["measurement_scope"] = "offline synthetic fixture; no live network or real LLM"
     if input_tokens is not None and output_tokens is not None:
         usage = LLMUsage(
-            provider="operator-supplied", model="operator-supplied",
-            input_tokens=input_tokens, output_tokens=output_tokens,
+            provider="operator-supplied",
+            model="operator-supplied",
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
         )
         result["llm_cost_usd"] = calculate_llm_cost(
             usage, input_usd_per_million=input_rate, output_usd_per_million=output_rate
@@ -132,8 +130,10 @@ def collect_from_manifest(
     manifest: CollectionManifest = load_manifest(manifest_path)
     return {
         **collect_authorized(
-            manifest, cache_dir=cache_dir,
-            allow_network=allow_network, min_pages=min_pages,
+            manifest,
+            cache_dir=cache_dir,
+            allow_network=allow_network,
+            min_pages=min_pages,
         ),
         "status": "snapshot_audit_only",
     }

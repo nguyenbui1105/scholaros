@@ -156,7 +156,8 @@ def collect_offline(
 
 
 def collect_authorized(
-    manifest: CollectionManifest, *,
+    manifest: CollectionManifest,
+    *,
     cache_dir: Path,
     allow_network: bool = False,
     min_pages: int = 50,
@@ -190,9 +191,7 @@ def collect_authorized(
             ) as robots_page:
                 if robots_page.status != 200:
                     raise PermissionError(f"Robots unavailable for {host}")
-                robots_text = robots_page.read(MAX_RESPONSE_BYTES).decode(
-                    "utf-8", errors="replace"
-                )
+                robots_text = robots_page.read(MAX_RESPONSE_BYTES).decode("utf-8", errors="replace")
             parser = RobotFileParser()
             parser.parse(robots_text.splitlines())
             robots_by_host[host] = parser
@@ -225,7 +224,8 @@ def collect_authorized(
 def save_candidates(path: Path, urls: list[str], *, discovered_from: str) -> None:
     """Write unreviewed candidates as JSON, never imply permission or eligibility."""
     manifest = CollectionManifest(
-        approved_by_operator=False, terms_checked=False,
+        approved_by_operator=False,
+        terms_checked=False,
         candidates=[CandidateURL(url=url, discovered_from=discovered_from) for url in urls],
     )
     path.parent.mkdir(parents=True, exist_ok=True)

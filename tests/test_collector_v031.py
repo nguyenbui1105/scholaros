@@ -29,21 +29,25 @@ def test_canonicalization_and_host_restrictions() -> None:
 
 
 def test_discovery_avoids_offsite_login_and_duplicates() -> None:
-    html = ('<a href="/scholarships/stem">STEM</a>'
-            '<a href="https://example.edu/scholarships/stem#details">again</a>'
-            '<a href="/login">login</a>'
-            '<a href="https://evil.com/scholarships/x">offsite</a>')
+    html = (
+        '<a href="/scholarships/stem">STEM</a>'
+        '<a href="https://example.edu/scholarships/stem#details">again</a>'
+        '<a href="/login">login</a>'
+        '<a href="https://evil.com/scholarships/x">offsite</a>'
+    )
     links = discover_links("https://example.edu/scholarships/", html)
     assert links == ["https://example.edu/scholarships/stem"]
 
 
 def test_missing_permission_prevents_collection() -> None:
     with pytest.raises(PermissionError):
-        validate_manifest(CollectionManifest(
-            approved_by_operator=False,
-            terms_checked=False,
-            candidates=[CandidateURL(url="https://example.edu/scholarship")],
-        ))
+        validate_manifest(
+            CollectionManifest(
+                approved_by_operator=False,
+                terms_checked=False,
+                candidates=[CandidateURL(url="https://example.edu/scholarship")],
+            )
+        )
 
 
 def test_manifest_is_not_a_verified_collection() -> None:
@@ -65,7 +69,8 @@ def test_60_offline_snapshots_have_real_hashes_but_no_award_verification(
     for i in range(60):
         snap = SourceSnapshot.from_text(
             f"https://example.edu/scholarships/{i:03d}",
-            "Fictional scholarship test fixture. No actual awards.", timestamp,
+            "Fictional scholarship test fixture. No actual awards.",
+            timestamp,
         )
         path = tmp_path / f"{i:03d}.json"
         path.write_text(snap.model_dump_json(), encoding="utf-8")
@@ -78,7 +83,8 @@ def test_60_offline_snapshots_have_real_hashes_but_no_award_verification(
 
 def test_duplicate_snapshots_not_counted_twice(tmp_path: Path) -> None:
     snap = SourceSnapshot.from_text(
-        "https://example.edu/scholarships/a", "synthetic",
+        "https://example.edu/scholarships/a",
+        "synthetic",
         datetime(2026, 11, 19, tzinfo=UTC),
     )
     paths = []
@@ -92,7 +98,8 @@ def test_duplicate_snapshots_not_counted_twice(tmp_path: Path) -> None:
 
 def test_snapshot_hash_tampering_is_blocked(tmp_path: Path) -> None:
     snap = SourceSnapshot.from_text(
-        "https://example.edu/scholarships/a", "synthetic",
+        "https://example.edu/scholarships/a",
+        "synthetic",
         datetime(2026, 11, 19, tzinfo=UTC),
     ).model_copy(update={"content_hash": "0" * 64})
     path = tmp_path / "fake.json"

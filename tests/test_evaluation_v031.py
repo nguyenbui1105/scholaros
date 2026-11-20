@@ -15,8 +15,10 @@ from scholaros.records import SourceSnapshot
 
 DATE = datetime(2026, 11, 19, tzinfo=UTC)
 URL = "https://example.edu/scholarship"
-TEXT = ("F-1 students may apply. Demo College students may apply. "
-        "Computer science majors may apply. Minimum GPA 3.0. Deadline: 2027-05-01.")
+TEXT = (
+    "F-1 students may apply. Demo College students may apply. "
+    "Computer science majors may apply. Minimum GPA 3.0. Deadline: 2027-05-01."
+)
 
 
 def snapshot() -> SourceSnapshot:
@@ -32,12 +34,19 @@ QUOTES = {
 }
 
 
-def label(reviewer: str, *, case_id: str = "synthetic-1",
-          decision: str = "eligible", quotes: dict[str, str] | None = None
-          ) -> Annotation:
+def label(
+    reviewer: str,
+    *,
+    case_id: str = "synthetic-1",
+    decision: str = "eligible",
+    quotes: dict[str, str] | None = None,
+) -> Annotation:
     return Annotation(
-        case_id=case_id, reviewer_id=reviewer, source_url=URL,
-        content_hash=snapshot().content_hash, decision=decision,
+        case_id=case_id,
+        reviewer_id=reviewer,
+        source_url=URL,
+        content_hash=snapshot().content_hash,
+        decision=decision,
         field_labels={key: "eligible" for key in QUOTES},
         evidence_quotes=QUOTES if quotes is None else quotes,
         other_requirements_reviewed=True,
@@ -75,11 +84,13 @@ def test_nonverbatim_quote_is_rejected() -> None:
 
 def test_disagreement_is_not_silent_gold() -> None:
     a = label("a")
-    b = label("b").model_copy(update={
-        "decision": "unknown",
-        "field_labels": {**label("b").field_labels, "visa": "unknown"},
-        "other_requirements_reviewed": False,
-    })
+    b = label("b").model_copy(
+        update={
+            "decision": "unknown",
+            "field_labels": {**label("b").field_labels, "visa": "unknown"},
+            "other_requirements_reviewed": False,
+        }
+    )
     assert adjudicate([a, b], {"synthetic-1": snapshot()}) == []
 
 
@@ -136,7 +147,10 @@ def test_false_eligible_is_measured() -> None:
 
 def test_duplicate_predictions_rejected() -> None:
     with pytest.raises(ValueError, match="duplicate"):
-        evaluate_predictions([], [
-            Prediction(case_id="a", decision="unknown"),
-            Prediction(case_id="a", decision="unknown"),
-        ])
+        evaluate_predictions(
+            [],
+            [
+                Prediction(case_id="a", decision="unknown"),
+                Prediction(case_id="a", decision="unknown"),
+            ],
+        )

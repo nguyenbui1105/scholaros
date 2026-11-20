@@ -177,16 +177,15 @@ def evaluate_predictions(
 
     n = len(gold)
     tp = matrix["eligible->eligible"]
-    fp = sum(
-        matrix[f"{status}->eligible"] for status in ("ineligible", "unknown")
-    )
+    fp = sum(matrix[f"{status}->eligible"] for status in ("ineligible", "unknown"))
     fn = sum(
         matrix[f"eligible->{prediction}"]
         for prediction in ("ineligible", "unknown", "needs_verification")
     )
     noneligible = sum(item.decision != "eligible" for item in gold)
     abstentions = sum(
-        count for key, count in matrix.items()
+        count
+        for key, count in matrix.items()
         if key.endswith("->unknown") or key.endswith("->needs_verification")
     )
     classified = n - abstentions

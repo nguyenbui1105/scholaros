@@ -101,7 +101,9 @@ def main() -> None:
             )
         elif args.command == "eval-real":
             result = evaluate_files(
-                args.annotations, args.predictions, args.snapshots,
+                args.annotations,
+                args.predictions,
+                args.snapshots,
                 resolutions_path=args.resolutions,
             )
         elif args.command == "perf":
@@ -116,8 +118,10 @@ def main() -> None:
             result = discover_from_saved_html(args.base_url, args.html, args.out)
         elif args.command == "collect":
             result = collect_from_manifest(
-                args.manifest, args.cache_dir,
-                allow_network=args.allow_network, min_pages=args.min_pages,
+                args.manifest,
+                args.cache_dir,
+                allow_network=args.allow_network,
+                min_pages=args.min_pages,
             )
         elif args.command == "audit-corpus":
             result = audit_offline_dir(args.snapshots, min_pages=args.min_pages)

@@ -39,10 +39,8 @@ def calculate_llm_cost(
     ):
         raise ValueError("Usage prices must be finite nonnegative amounts")
     return round(
-        (
-            usage.input_tokens * input_usd_per_million
-            + usage.output_tokens * output_usd_per_million
-        ) / 1_000_000,
+        (usage.input_tokens * input_usd_per_million + usage.output_tokens * output_usd_per_million)
+        / 1_000_000,
         8,
     )
 
