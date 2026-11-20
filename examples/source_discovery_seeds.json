@@ -1,0 +1,61 @@
+{
+  "note": "Publicly discoverable institutional index/detail URLs only. These are candidate sources, not downloaded or confirmed reusable pages; robots/terms/operator authorization required.",
+  "last_reviewed": "2026-11-19",
+  "sources": [
+    {
+      "url": "https://onsa.asu.edu/scholarships",
+      "kind": "university_index",
+      "status": "candidate_unreviewed_terms"
+    },
+    {
+      "url": "https://www.oregonstudentaid.gov/scholarships/catalog/",
+      "kind": "state_catalog_index",
+      "status": "candidate_unreviewed_terms"
+    },
+    {
+      "url": "https://osacapps.hecc.oregon.gov/Catalog/Default.aspx",
+      "kind": "state_catalog",
+      "status": "candidate_unreviewed_terms"
+    },
+    {
+      "url": "https://www.pcc.edu/enroll/paying-for-college/scholarships/apply/",
+      "kind": "college_program_page",
+      "status": "candidate_unreviewed_terms"
+    },
+    {
+      "url": "https://financialaid.berkeley.edu/types-of-aid-at-berkeley/scholarships/scholarship-search/",
+      "kind": "university_index",
+      "status": "candidate_unreviewed_terms"
+    },
+    {
+      "url": "https://finaid.umich.edu/types-aid/scholarships/undergraduate",
+      "kind": "university_index",
+      "status": "candidate_unreviewed_terms"
+    },
+    {
+      "url": "https://financialaid.uconn.edu/scholarship-links/",
+      "kind": "university_index",
+      "status": "candidate_unreviewed_terms"
+    },
+    {
+      "url": "https://onsa.asu.edu/scholarship/charles-b-rangel-international-affairs-summer-enrichment-program",
+      "kind": "university_detail",
+      "status": "candidate_unreviewed_terms"
+    },
+    {
+      "url": "https://onsa.asu.edu/scholarship/gilman-international-scholarship",
+      "kind": "university_detail",
+      "status": "candidate_unreviewed_terms"
+    },
+    {
+      "url": "https://onsa.asu.edu/scholarship/knight-hennessy-scholars-program",
+      "kind": "university_detail",
+      "status": "candidate_unreviewed_terms"
+    },
+    {
+      "url": "https://onsa.asu.edu/scholarship/smart-scholarship-service-program",
+      "kind": "university_detail",
+      "status": "candidate_unreviewed_terms"
+    }
+  ]
+}
