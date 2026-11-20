@@ -5,7 +5,7 @@
 | Eligibility: four states, quote-backed constraints, normalization | Tested on synthetic cases | `test_eligibility.py`, benchmark |
 | Provenance schemas and optional encrypted SQLite vault / purge | Tested | `test_records_storage.py` |
 | PCC/OSAC connector definitions and opt-in, robots-aware fetch | Implemented, **live untested** | Offline tests only |
-| v0.3 read-only program-source research (candidates, hash, review queue, public SQLite snapshots) | Implemented; offline regression tests pending CI, live untested | `src/scholaros/research.py`, `tests/test_research.py` |
+| v0.3 read-only program-source research (candidates, hash, review queue, public SQLite snapshots) | Implemented; 13 offline research tests passing, live untested | `src/scholaros/research.py`, `tests/test_research.py` |
 | HTML extraction, freshness, dedup | Tested on synthetic HTML | `test_ingestion.py` |
 | Ranking + budget optimization | Tested on synthetic records | `test_ranking_policy.py`, `test_portfolio_writing.py` |
 | Writing policy, MockLLM, literal review, outline and packet | Tested on fictional records | `test_portfolio_writing.py` |
@@ -21,6 +21,12 @@
 
 ## Release quality gates
 CI enforces Ruff lint/format, mypy --strict on src/, Python 3.11/3.12, pytest >=85% statement coverage, synthetic benchmark, and skill-contract validation. Dependency audit and Gitleaks are separately enforced. This document does not claim a hosted interface, or verified official-source eligibility.
+
+## v0.3 source research verification (2026-11-20)
+- Feature branch Python 3.11/3.12, strict mypy, Ruff lint+format, security scans and dependency audits passed.
+- **125 tests passing**, **90.84% statement coverage** in [feature-branch CI](https://github.com/nguyenbui1105/scholaros/actions/runs/44696093675).
+- Both source pages are **program-level landing pages**; zero verified individual awards and no automatic eligibility promotion.
+- Live source fetching has not been tested or independently checked for providers' terms/robots; real student eligibility is not established.
 
 ## Verified release checklist (2026-11-18)
 - Python 3.11 and 3.12: test matrix passing, Ruff lint and format, strict mypy.
