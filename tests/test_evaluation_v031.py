@@ -133,6 +133,7 @@ def test_false_eligible_is_measured() -> None:
     neg = label("a").model_copy(
         update={
             "content_hash": negative_snapshot.content_hash,
+            "decision": "ineligible",
             "field_labels": {**label("a").field_labels, "visa": "ineligible"},
             "evidence_quotes": {**QUOTES, "visa": "F-1 students are ineligible"},
         }
