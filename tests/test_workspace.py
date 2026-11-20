@@ -93,6 +93,9 @@ def test_workspace_coordinates_agents_without_submitting() -> None:
     assert output["workflow"] == "assisted_application"
     assert output["applications"][0]["eligibility"] == "eligible"
     assert output["applications"][0]["submission_status"] == "NOT_SUBMITTED"
+    assert output["applications"][0]["prefill_fields"]["visa_status"] == "F-1"
+    assert output["applications"][0]["prefill_fields"]["gpa"] == 3.8
+    assert output["applications"][0]["missing_fields"] == []
     assert not output["applications"][0]["approved"]
     assert output["applications"][0]["essay_mode"] == "none"
     assert "I won a prestigious" not in str(output)
