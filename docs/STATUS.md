@@ -5,6 +5,7 @@
 | Eligibility: four states, quote-backed constraints, normalization | Tested on synthetic cases | `test_eligibility.py`, benchmark |
 | Provenance schemas and optional encrypted SQLite vault / purge | Tested | `test_records_storage.py` |
 | PCC/OSAC connector definitions and opt-in, robots-aware fetch | Implemented, **live untested** | Offline tests only |
+| v0.3 read-only program-source research (candidates, hash, review queue, public SQLite snapshots) | Implemented; offline regression tests pending CI, live untested | `src/scholaros/research.py`, `tests/test_research.py` |
 | HTML extraction, freshness, dedup | Tested on synthetic HTML | `test_ingestion.py` |
 | Ranking + budget optimization | Tested on synthetic records | `test_ranking_policy.py`, `test_portfolio_writing.py` |
 | Writing policy, MockLLM, literal review, outline and packet | Tested on fictional records | `test_portfolio_writing.py` |
@@ -12,7 +13,7 @@
 | Offline JSON CLI (`init`, `ingest`, `match`, `rank`, `explain`, `draft`, `review`, `packet`, `purge`, `demo`, `schemas`) | Tested | `test_cli_e2e.py` |
 | 20 skill contracts | 9 limited tested, 11 specified | `test_skill_contracts.py` |
 | Synthetic adversarial benchmark (83 pairs) | Test-asserted | `test_benchmark.py` |
-| Real-world scholarship eligibility or confirmed provider AI policies | Not implemented | N/A |
+| Real-world scholarship eligibility or confirmed provider AI policies | Not implemented; v0.3 never marks a program-level candidate eligible | N/A |
 | Live portal integrations / automatic submissions | Not implemented | N/A |
 | Web dashboard / SaaS authentication | Not implemented | N/A |
 

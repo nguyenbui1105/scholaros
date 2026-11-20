@@ -106,6 +106,23 @@ flowchart TD
 
 The actual code is in `src/scholaros/`. [Architecture](docs/ARCHITECTURE.md) describes trust boundaries; [RFC](docs/RFC-0001.md) describes future ambitions, not completed components.
 
+## 🔭 v0.3 source-research preview (unreleased)
+
+ScholarOS can inspect a **registered official program landing page** from PCC Foundation or OSAC as a *read-only research source*. This produces immutable source hashes, verbatim candidate excerpts and a manual review queue. **It never automatically confirms individual scholarship eligibility.**
+
+```bash
+# Explicit opt-in to a robots-aware network request; may fail closed if disallowed
+scholaros research pcc --allow-network --cache-dir .scholaros/cache --json
+
+# Same page, from a previously saved cache; no network access
+scholaros research pcc --cache-dir .scholaros/cache --json
+
+# OSAC program-level page (not the 600+ individual awards)
+scholaros research osac --allow-network --cache-dir .scholaros/cache --json
+```
+
+Live URLs and site permission must be checked before using this workflow. Offline cache content, even if it has a matching hash, is **untrusted**; output is always `needs_verification`, `verified_awards=0`, and `NOT_SUBMITTED`. No student records are needed or saved. See [source research guide](docs/RESEARCH_V03.md).
+
 ## 🛡 Core safeguards
 
 - Never infer missing visa, school, major, GPA, or source claims as an eligibility mismatch.

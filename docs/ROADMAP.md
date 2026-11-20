@@ -8,7 +8,17 @@
 - [x] Writing policy gates, MockLLM, outline, literal claim audit and packet
 - [x] Offline JSON CLI and fictional end-to-end fixture
 - [x] 20 skill contracts with explicit status and automated contract validator
-- [x] 36-pair synthetic benchmark, Python 3.11/3.12 lint, strict typing and tests
+- [x] 83-pair synthetic adversarial benchmark, Python 3.11/3.12 lint, strict typing and tests
+
+## v0.3 — read-only source research (feature branch)
+
+- [x] Exact PCC/OSAC provider registry with read-only program-page snapshot inspection
+- [x] Snapshot URL/digest/freshness checks and verbatim candidate excerpts
+- [x] Suppression of excerpted candidates in explicitly negated/exclusion contexts
+- [x] Offline-cache CLI and optional public snapshot storage without applicant PII
+- [x] Manual review queue, no automatic eligible rankings, no submission
+- [ ] Real permission/robots validation end-to-end for current live websites
+- [ ] Individual award catalog, per-award authoritative rule adjudication
 
 ## Next — grounded public-source beta
 - [ ] Independent real-source authority/permission validation and repeatable robots compliance

@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased] — v0.3 source research slice
+
+- Added `scholaros research pcc|osac` read-only CLI with offline cache and explicit `--allow-network` switch.
+- Validate exact registry URL, SHA-256 snapshot integrity and freshness; preserve verbatim extracted candidate quotes and hash.
+- Flag and suppress negated/exclusion contexts; return a manual review queue, `needs_verification`, zero verified individual awards and no ranking/submission.
+- Optional persistence into the existing public-source SQLite table with no applicant data.
+- Offline tests for both providers, cache miss, tampered snapshot, stale date, negated quote, CLI behavior and persistence. Live provider access remains unverified.
+
 ## [Unreleased] — eligibility hardening
 
 - Added fail-closed 0–4 finite GPA validation, including NaN/Infinity/out-of-range guards.

@@ -17,3 +17,6 @@ uploads/
 *.sqlite
 *.db
 .DS_Store
+
+# Local research cache and public snapshot database (never commit applicant data)
+.scholaros/
