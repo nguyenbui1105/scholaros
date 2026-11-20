@@ -59,6 +59,6 @@ Approval is recorded only in the encrypted local workspace; no portal is contact
 
 - A program landing page does **not** establish criteria for an individual award. For real catalog entries, manually verify source authenticity, every constraint, other conditions, and the scholarship's AI-writing policies. Supplying a reviewer string by itself is *not* independent authentication.
 - A local encrypted file is not a production multi-user vault. Key loss makes it unreadable; key rotation, backups, web auth, tenant isolation and deletion of external copies are not provided.
-- Essay writing is **outline-only** under explicit permission; student-authored final essays and human review remain mandatory. Unknown AI policy prohibits writing assistance.
+- Essay writing is **outline-only** under explicit permission; student-authored final essays and human review remain mandatory. Packets can prefill declared level, visa category, school, majors and GPA, but cannot fabricate missing documents, financial details, recommendation letters or scholarship-specific answers. Unknown AI policy prohibits writing assistance.
 - Automatic external application submission across portals is **not implemented**; site terms, authentication, accessibility, explicit per-packet student approval, audited permitted provider APIs and verified submission receipts are needed.
 - No site login scraping, CAPTCHA/anti-bot bypass or guarantee of scholarship awards. This tool is not legal, immigration, or financial-aid advice.

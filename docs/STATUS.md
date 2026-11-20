@@ -20,8 +20,8 @@
 | 50–100 real official snapshots and blind double-reviewed cases | **Not completed / cannot claim measured accuracy** | `docs/V031_EVALUATION.md` |
 | Real-world scholarship eligibility or confirmed provider AI policies | Not implemented; v0.3 never marks a program-level candidate eligible | N/A |
 | Live portal integrations / automatic submissions | Not implemented | N/A |
-| Local encrypted student onboarding and deterministic agent-role coordinator | Implemented, CI verification pending | `workspace.py`, `workspace_cli.py`, `tests/test_workspace*.py` |
-| Verbatim-evidence outline and review packet with hash-bound consent | Implemented, CI verification pending; synthetic cases | `workspace.py` |
+| Local encrypted student onboarding and deterministic agent-role coordinator | Implemented, tested | `workspace.py`, `workspace_cli.py`, `tests/test_workspace*.py` |
+| Verbatim-evidence outline and review packet with hash-bound consent | Implemented, tested on fictional cases | `workspace.py` |
 | Real provider-approved submit adapters, receipt verification and portal automation | **Not implemented** | Explicitly blocked |
 | Web dashboard / SaaS authentication | Not implemented | N/A |
 
@@ -57,3 +57,9 @@ CI enforces Ruff lint/format, mypy --strict on src/, Python 3.11/3.12, pytest >=
 - Python 3.11/3.12, Ruff lint/format, `mypy --strict`, dependency audit and Gitleaks pass.
 - Offline synthetic benchmark p50/p95 and throughput are reported in [V031_BENCHMARK_RESULTS.md](V031_BENCHMARK_RESULTS.md).
 - **0 verified live-page corpus files, 0 independent real human gold labels, 0 validated model-versus-real-source eligible predictions.** Therefore real-world metrics are **unmeasured**. This milestone delivers the evaluation framework, not completion of the human data campaign.
+
+## Assisted-application workspace verification (2026-11-20)
+- [CI feature branch](https://github.com/nguyenbui1105/scholaros/actions/runs/44727328577): **175 tests passed**, **86.54% statement coverage**, Python 3.11/3.12, Ruff lint/format, strict mypy, dependency audit and Gitleaks all passed.
+- Live agent deployment: seven deterministic roles are orchestrated in-process, **not seven long-running LLM agents**. Real autonomous scholarship research and submission remain unimplemented.
+- Encrypted onboarding, local reviewed-case matching, evidence-only outline, prefilled basic form fields, packet hash and explicit approval are available. CI fixture catalog is fictional; do not treat matches as real scholarship eligibility.
+- The CLI has no authorized real-provider submission integration, and **no portal is contacted, no submission receipt is issued**.
