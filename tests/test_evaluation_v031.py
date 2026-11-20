@@ -75,7 +75,11 @@ def test_nonverbatim_quote_is_rejected() -> None:
 
 def test_disagreement_is_not_silent_gold() -> None:
     a = label("a")
-    b = label("b").model_copy(update={"decision": "unknown"})
+    b = label("b").model_copy(update={
+        "decision": "unknown",
+        "field_labels": {**label("b").field_labels, "visa": "unknown"},
+        "other_requirements_reviewed": False,
+    })
     assert adjudicate([a, b], {"synthetic-1": snapshot()}) == []
 
 

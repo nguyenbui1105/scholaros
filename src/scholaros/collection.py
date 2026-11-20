@@ -6,7 +6,6 @@ provider terms permit the requested access. Network activity is opt-in.
 
 from __future__ import annotations
 
-import json
 import re
 import time
 from collections.abc import Iterable
