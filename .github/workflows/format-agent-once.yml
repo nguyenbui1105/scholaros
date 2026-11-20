@@ -31,3 +31,5 @@ jobs:
             git commit -m "style: apply Ruff formatting to agent workspace"
             git push origin HEAD:feat/agent-application-workspace
           fi
+
+# Formatting pass for additional direct onboarding tests
