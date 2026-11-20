@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] — encrypted assisted-application workspace
+
+- Added interactive student onboarding to a Fernet-encrypted local workspace; no plaintext applicant storage or secrets in git.
+- Added deterministic agent-role workflow for source triage, eligibility, AI policy, evidence-only narrative outline, packet compilation, ranking, and submission coordination.
+- Added per-packet SHA-256 consent and no-submission guarantees with an explicit approval command.
+- Added fictional sample catalog/profile and offline end-to-end CLI regression tests.
+- No real scholarship catalog or provider-authorized automatic portal submission is included; a student's approval alone is not a submission receipt.
+- Complete instructions: `docs/AGENT_WORKSPACE.md`.
+
+
 ## [Unreleased] — v0.3.1 real-source evaluation infrastructure
 
 - Added same-origin scholarship URL discovery, exact HTTPS/host restrictions and operator-approved, robots-aware bounded collection.

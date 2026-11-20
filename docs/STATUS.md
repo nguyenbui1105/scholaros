@@ -20,6 +20,9 @@
 | 50–100 real official snapshots and blind double-reviewed cases | **Not completed / cannot claim measured accuracy** | `docs/V031_EVALUATION.md` |
 | Real-world scholarship eligibility or confirmed provider AI policies | Not implemented; v0.3 never marks a program-level candidate eligible | N/A |
 | Live portal integrations / automatic submissions | Not implemented | N/A |
+| Local encrypted student onboarding and deterministic agent-role coordinator | Implemented, CI verification pending | `workspace.py`, `workspace_cli.py`, `tests/test_workspace*.py` |
+| Verbatim-evidence outline and review packet with hash-bound consent | Implemented, CI verification pending; synthetic cases | `workspace.py` |
+| Real provider-approved submit adapters, receipt verification and portal automation | **Not implemented** | Explicitly blocked |
 | Web dashboard / SaaS authentication | Not implemented | N/A |
 
 **No legal, immigration or financial-aid advice.** Awards never guaranteed. Student data requires explicit consent, an encrypted vault key and additional security controls before real use; no production SaaS readiness claimed.

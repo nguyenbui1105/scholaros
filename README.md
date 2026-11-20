@@ -142,6 +142,26 @@ scholaros eval-real --annotations ./annotations.jsonl \
 
 **Crucial scope:** 11 official institutional URL *candidates* are listed in the starter manifest. **No 50–100-page collection has been verified**, no independent real-world gold annotation set exists, and therefore **real-world accuracy, recall, and LLM costs are not yet measured**. These metrics remain undefined rather than silently reusing synthetic results. See [full evaluation protocol](docs/V031_EVALUATION.md) and [status](docs/STATUS.md).
 
+## 🧭 Assisted Application Workspace (new, offline)
+
+The new encrypted **agent workspace** supports one-time profile intake, automatic coordination of seven deterministic specialist roles, evidence-only outlines when a scholarship's AI policy is verified, prioritized review packets, and digest-bound approval. It is intentionally **not an automatic live portal-submission service**.
+
+```bash
+# Generate a Fernet key and store it privately (do not commit it to GitHub)
+export SCHOLAROS_FERNET_KEY="$(python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')"
+
+# Enter your real facts interactively — no SSN/passport required
+scholaros onboard
+
+# Demo uses a FICTIONAL local award catalog, not real scholarship offers
+scholaros autopilot --catalog examples/agent_demo_catalog.json --json
+
+# Review encrypted packet metadata
+scholaros workspace --json
+```
+
+For the full fictional walkthrough, [read the agent workspace guide](docs/AGENT_WORKSPACE.md). Real scholarship application catalogs, official-source trust, authorized destination adapters and per-packet submission receipts are **not** built yet. The assistant will never falsely report a submission.
+
 ## 🛡 Core safeguards
 
 - Never infer missing visa, school, major, GPA, or source claims as an eligibility mismatch.

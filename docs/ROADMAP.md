@@ -31,6 +31,17 @@
 - [ ] Run held-out real-source matching accuracy and report confidence intervals
 - [ ] Measure live network and LLM latency/throughput/cost using actual usage
 
+## Assisted-application local MVP (implementation underway)
+
+- [x] Encrypted one-time applicant intake and local profile workspace
+- [x] Seven deterministic agent roles with source and AI-policy gates
+- [x] Evidence-only story outline and hash-bound packet approval queue
+- [ ] Verified catalog of individual real scholarships accepting relevant applicant profiles
+- [ ] Audited, officially permitted provider API submission adapters and receipts
+- [ ] Authenticated web UI, applicant document vault and granular consent ledger
+
+**No unattended form submission or CAPTCHA circumvention is planned.** After reviewing a packet, the applicant must explicitly authorize its exact destination and final version.
+
 ## Next — grounded public-source beta
 - [ ] Independent real-source authority/permission validation and repeatable robots compliance
 - [ ] Manually adjudicated eligibility cases from multiple providers (F-1, citizenship, enrollment conditions)
