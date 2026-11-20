@@ -264,13 +264,15 @@ def create_workspace(
                 "gpa": applicant.student.gpa,
             },
             "missing_fields": [
-                field for field, value in {
+                field
+                for field, value in {
                     "academic_level": applicant.student.academic_level,
                     "visa_status": applicant.student.visa_status,
                     "school": applicant.student.school,
                     "majors": applicant.student.majors,
                     "gpa": applicant.student.gpa,
-                }.items() if value is None or value == "" or value == ()
+                }.items()
+                if value is None or value == "" or value == ()
             ],
             "packet_state": "DRAFT_REQUIRES_STUDENT_REVIEW",
             "approved": False,
