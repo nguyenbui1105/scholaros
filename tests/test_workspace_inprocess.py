@@ -19,11 +19,18 @@ from scholaros.workspace_cli import (
 def test_interactive_intake_uses_minimal_data(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    answers = iter([
-        "local-id", "Demo College", "F-1", "undergraduate",
-        "computer science, mathematics", "3.7",
-        "I built a school project.", "YES",
-    ])
+    answers = iter(
+        [
+            "local-id",
+            "Demo College",
+            "F-1",
+            "undergraduate",
+            "computer science, mathematics",
+            "3.7",
+            "I built a school project.",
+            "YES",
+        ]
+    )
     monkeypatch.setattr("builtins.input", lambda _prompt: next(answers))
     result = interactive_intake()
     assert result.student.student_id == "local-id"
@@ -57,7 +64,9 @@ def test_direct_onboard_autopilot_inspect_and_approve(
     assert result["evidence_items"] == 2
 
     run = execute(
-        private, Path("examples/agent_demo_catalog.json"), packets,
+        private,
+        Path("examples/agent_demo_catalog.json"),
+        packets,
         today=date(2026, 11, 20),
     )
     assert run["packets_created"] == 1
@@ -71,7 +80,9 @@ def test_direct_onboard_autopilot_inspect_and_approve(
     assert private_review["student_id"] == "synthetic-demo"
     packet = private_review["applications"][0]
     updated = approve(
-        packets, packet_id=packet["id"], packet_hash=packet["packet_hash"],
+        packets,
+        packet_id=packet["id"],
+        packet_hash=packet["packet_hash"],
         student_confirmed=True,
     )
     assert updated["approved_for_manual_review"]
@@ -86,11 +97,9 @@ def test_direct_wrong_hash_denied_without_changing_state(
     profile = tmp_path / "profile.enc"
     output = tmp_path / "out.enc"
     enroll(profile, profile_json=Path("examples/agent_demo_profile.json"))
-    execute(profile, Path("examples/agent_demo_catalog.json"), output,
-            today=date(2026, 11, 20))
+    execute(profile, Path("examples/agent_demo_catalog.json"), output, today=date(2026, 11, 20))
     with pytest.raises(PermissionError):
-        approve(output, packet_id="fictional-stem", packet_hash="f" * 64,
-                student_confirmed=True)
+        approve(output, packet_id="fictional-stem", packet_hash="f" * 64, student_confirmed=True)
     assert inspect(output)["applications"][0]["approved"] is False
 
 
