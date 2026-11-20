@@ -17,7 +17,7 @@ from cryptography.fernet import Fernet
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .eligibility import assess_eligibility, normalize
-from .models import AIUsePolicy, ClaimRecord, Decision, Opportunity, Student
+from .models import AIUsePolicy, ClaimRecord, Decision, EligibilityResult, Opportunity, Student
 from .policy import WritingMode, writing_mode
 from .ranking import rank_eligible
 from .records import EvidenceItem, StudentProfile
@@ -90,13 +90,9 @@ def save_private(path: Path, content: dict[str, Any]) -> None:
     if hasattr(os, "O_NOFOLLOW"):
         flags |= os.O_NOFOLLOW
     fd = os.open(path, flags, 0o600)
-    try:
-        os.fchmod(fd, 0o600)
-        with os.fdopen(fd, "wb") as handle:
-            handle.write(encrypted)
-    except BaseException:
-        os.close(fd) if not os.fstat(fd).st_size else None
-        raise
+    os.fchmod(fd, 0o600)
+    with os.fdopen(fd, "wb") as handle:
+        handle.write(encrypted)
 
 
 def load_private(path: Path) -> dict[str, Any]:
@@ -190,7 +186,7 @@ def create_workspace(
     )
     events: list[dict[str, str]] = []
     packets: list[dict[str, Any]] = []
-    eligible: list[tuple[Opportunity, Any]] = []
+    eligible: list[tuple[Opportunity, EligibilityResult]] = []
 
     def event(agent: str, target: str, status: str) -> None:
         events.append({"agent": agent, "target": target, "status": status})
