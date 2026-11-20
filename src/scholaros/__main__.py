@@ -80,8 +80,7 @@ def main() -> None:
     onboard.add_argument("--json", action="store_true")
     autopilot = sub.add_parser("autopilot", help="Coordinate agents for locally reviewed awards")
     autopilot.add_argument("--vault", type=Path, default=Path(".scholaros/profile.enc"))
-    autopilot.add_argument("--catalog", type=Path,
-                           default=Path("examples/agent_demo_catalog.json"))
+    autopilot.add_argument("--catalog", type=Path, default=Path("examples/agent_demo_catalog.json"))
     autopilot.add_argument("--out", type=Path, default=Path(".scholaros/applications.enc"))
     autopilot.add_argument("--today", type=date.fromisoformat, help="Provider-local YYYY-MM-DD")
     autopilot.add_argument("--json", action="store_true")
@@ -151,14 +150,14 @@ def main() -> None:
         elif args.command == "onboard":
             result = enroll(args.out, profile_json=args.profile_json)
         elif args.command == "autopilot":
-            result = execute(
-                args.vault, args.catalog, args.out, today=args.today or date.today()
-            )
+            result = execute(args.vault, args.catalog, args.out, today=args.today or date.today())
         elif args.command == "workspace":
             result = inspect(args.file, reveal=args.reveal)
         elif args.command == "approve-packet":
             result = approve(
-                args.file, packet_id=args.packet_id, packet_hash=args.hash,
+                args.file,
+                packet_id=args.packet_id,
+                packet_hash=args.hash,
                 student_confirmed=args.yes,
             )
         elif args.command == "purge":

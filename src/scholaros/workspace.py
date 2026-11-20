@@ -65,8 +65,11 @@ class ScholarshipCase(BaseModel):
 
 
 def _digest(value: Any) -> str:
-    return sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
-                             default=str, separators=(",", ":")).encode("utf-8")).hexdigest()
+    return sha256(
+        json.dumps(
+            value, sort_keys=True, ensure_ascii=False, default=str, separators=(",", ":")
+        ).encode("utf-8")
+    ).hexdigest()
 
 
 def _cipher() -> Fernet:
@@ -81,8 +84,9 @@ def save_private(path: Path, content: dict[str, Any]) -> None:
     student = content.get("student")
     if isinstance(student, dict) and not student.get("consent_to_store", False):
         raise PermissionError("Explicit consent to store student profile is required")
-    encrypted = _cipher().encrypt(json.dumps(content, default=str,
-                                              ensure_ascii=False).encode("utf-8"))
+    encrypted = _cipher().encrypt(
+        json.dumps(content, default=str, ensure_ascii=False).encode("utf-8")
+    )
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.is_symlink():
         raise PermissionError("Refuse to write through a symbolic link")
@@ -131,7 +135,8 @@ def _opportunity(case: ScholarshipCase) -> Opportunity:
         verified_on=case.verified_on,
         international_claim=(
             claim("international_claim", case.international_quote)
-            if case.international_quote else None
+            if case.international_quote
+            else None
         ),
         source_text=case.source_text,
         rule_claims={key: claim(key, value) for key, value in case.rule_quotes.items()},
@@ -139,8 +144,7 @@ def _opportunity(case: ScholarshipCase) -> Opportunity:
         effort_hours=case.effort_hours,
         ai_use_policy=case.ai_use_policy,
         unknown_requirements=(
-            () if case.other_requirements_reviewed else
-            ("Other conditions have not been reviewed",)
+            () if case.other_requirements_reviewed else ("Other conditions have not been reviewed",)
         ),
     )
 
@@ -154,8 +158,10 @@ def _policy(case: ScholarshipCase) -> AIUsePolicy:
     if case.ai_policy_quote not in case.source_text:
         return AIUsePolicy.UNKNOWN
     context = normalize(case.ai_policy_quote)
-    if any(item in context for item in ("not allowed", "forbidden", "prohibited",
-                                        "except", "excluding", "ineligible")):
+    if any(
+        item in context
+        for item in ("not allowed", "forbidden", "prohibited", "except", "excluding", "ineligible")
+    ):
         return AIUsePolicy.UNKNOWN
     if case.ai_use_policy is AIUsePolicy.ASSISTANCE_ALLOWED and (
         "ai-assisted drafting is permitted" in context or "ai tools allowed" in context
@@ -193,8 +199,11 @@ def create_workspace(
 
     confirmed = [item for item in applicant.evidence if item.confirmed_by_student]
     for case in cases:
-        event("source_researcher", case.id, "catalog_case_reviewed" if case.reviewer_id
-              else "source_review_required")
+        event(
+            "source_researcher",
+            case.id,
+            "catalog_case_reviewed" if case.reviewer_id else "source_review_required",
+        )
         opportunity = _opportunity(case)
         evaluation = assess_eligibility(student, opportunity, today=today)
         decision = evaluation.decision
@@ -206,13 +215,22 @@ def create_workspace(
         mode = writing_mode(permission)
         event("ai_policy_officer", case.id, mode.value)
         outline: list[str] = []
-        if decision is Decision.ELIGIBLE and mode in (
-            WritingMode.FULL_DRAFT, WritingMode.OUTLINE_ONLY,
-        ) and confirmed:
-            outline = list(story_to_outline(
-                "Explain how your evidence demonstrates your goals",
-                confirmed, permission,
-            ))
+        if (
+            decision is Decision.ELIGIBLE
+            and mode
+            in (
+                WritingMode.FULL_DRAFT,
+                WritingMode.OUTLINE_ONLY,
+            )
+            and confirmed
+        ):
+            outline = list(
+                story_to_outline(
+                    "Explain how your evidence demonstrates your goals",
+                    confirmed,
+                    permission,
+                )
+            )
             event("narrative_coach", case.id, "evidence_only_outline")
         else:
             event("narrative_coach", case.id, "waiting_for_source_or_policy")
@@ -225,8 +243,7 @@ def create_workspace(
             "source_reviewed_by": case.reviewer_id,
             "eligibility": decision.value,
             "reasons": [
-                {"code": reason.code, "field": reason.field,
-                 "severity": reason.severity.value}
+                {"code": reason.code, "field": reason.field, "severity": reason.severity.value}
                 for reason in evaluation.reasons
             ],
             "essay_mode": "outline_only" if outline else "none",
@@ -254,8 +271,7 @@ def create_workspace(
         "created_for_date": today.isoformat(),
         "applications": packets,
         "ranked": [
-            {"id": item.opportunity.id, "priority_score": item.score,
-             "factors": list(item.reasons)}
+            {"id": item.opportunity.id, "priority_score": item.score, "factors": list(item.reasons)}
             for item in ranked
         ],
         "audit_events": events,
@@ -283,7 +299,8 @@ def approve_packet(
         raise PermissionError("Packet digest mismatch: review latest packet before approval")
     # Exclude approval-related fields to ensure no edits have occurred after packet generation.
     core = {
-        key: value for key, value in packet.items()
+        key: value
+        for key, value in packet.items()
         if key not in {"packet_hash", "approved", "approval_packet_hash"}
     }
     core["approved"] = False

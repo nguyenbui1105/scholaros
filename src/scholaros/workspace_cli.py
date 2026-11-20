@@ -39,11 +39,16 @@ def interactive_intake() -> ApplicantBundle:
         consent_to_store=approved,
     )
     evidence = (
-        [EvidenceItem(
-            id="student-statement-1", student_id=identifier, statement=fact,
-            confirmed_by_student=True,
-        )]
-        if fact else []
+        [
+            EvidenceItem(
+                id="student-statement-1",
+                student_id=identifier,
+                statement=fact,
+                confirmed_by_student=True,
+            )
+        ]
+        if fact
+        else []
     )
     return ApplicantBundle(student=student, evidence=evidence)
 
@@ -103,7 +108,8 @@ def inspect(path: Path, *, reveal: bool = False) -> dict[str, Any]:
     return {
         "applications": [
             {
-                "id": item["id"], "eligibility": item["eligibility"],
+                "id": item["id"],
+                "eligibility": item["eligibility"],
                 "submission_status": item["submission_status"],
                 "packet_hash": item["packet_hash"],
                 "approved": item["approved"],
@@ -123,12 +129,9 @@ def approve(
     student_confirmed: bool,
 ) -> dict[str, Any]:
     workspace = load_private(path)
-    updated = approve_packet(
-        workspace, packet_id, packet_hash, student_confirmed=student_confirmed
-    )
+    updated = approve_packet(workspace, packet_id, packet_hash, student_confirmed=student_confirmed)
     workspace["applications"] = [
-        updated if item["id"] == packet_id else item
-        for item in workspace["applications"]
+        updated if item["id"] == packet_id else item for item in workspace["applications"]
     ]
     save_private(path, workspace)
     return {
