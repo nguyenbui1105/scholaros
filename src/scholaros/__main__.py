@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -18,6 +19,7 @@ from .evaluation_cli import (
 from .research import research_provider
 from .storage import connect, export_schemas, purge_student
 from .workflow import run_stage
+from .workspace_cli import approve, enroll, execute, inspect
 
 
 def main() -> None:
@@ -72,6 +74,27 @@ def main() -> None:
     audit.add_argument("--snapshots", type=Path, required=True)
     audit.add_argument("--min-pages", type=int, default=50)
     audit.add_argument("--json", action="store_true")
+    onboard = sub.add_parser("onboard", help="Create encrypted applicant profile interactively")
+    onboard.add_argument("--out", type=Path, default=Path(".scholaros/profile.enc"))
+    onboard.add_argument("--profile-json", type=Path, help="Optional existing applicant JSON")
+    onboard.add_argument("--json", action="store_true")
+    autopilot = sub.add_parser("autopilot", help="Coordinate agents for locally reviewed awards")
+    autopilot.add_argument("--vault", type=Path, default=Path(".scholaros/profile.enc"))
+    autopilot.add_argument("--catalog", type=Path,
+                           default=Path("examples/agent_demo_catalog.json"))
+    autopilot.add_argument("--out", type=Path, default=Path(".scholaros/applications.enc"))
+    autopilot.add_argument("--today", type=date.fromisoformat, help="Provider-local YYYY-MM-DD")
+    autopilot.add_argument("--json", action="store_true")
+    status = sub.add_parser("workspace", help="Inspect encrypted packets and approval queue")
+    status.add_argument("--file", type=Path, default=Path(".scholaros/applications.enc"))
+    status.add_argument("--reveal", action="store_true", help="Show private packet details")
+    status.add_argument("--json", action="store_true")
+    approval = sub.add_parser("approve-packet", help="Approve exact packet (no submission)")
+    approval.add_argument("--file", type=Path, default=Path(".scholaros/applications.enc"))
+    approval.add_argument("--packet-id", required=True)
+    approval.add_argument("--hash", required=True)
+    approval.add_argument("--yes", action="store_true", help="Explicit applicant confirmation")
+    approval.add_argument("--json", action="store_true")
     init = sub.add_parser("init")
     init.add_argument("--json", action="store_true")
     init.add_argument("--db", type=Path, default=Path(".scholaros/scholaros.db"))
@@ -125,6 +148,19 @@ def main() -> None:
             )
         elif args.command == "audit-corpus":
             result = audit_offline_dir(args.snapshots, min_pages=args.min_pages)
+        elif args.command == "onboard":
+            result = enroll(args.out, profile_json=args.profile_json)
+        elif args.command == "autopilot":
+            result = execute(
+                args.vault, args.catalog, args.out, today=args.today or date.today()
+            )
+        elif args.command == "workspace":
+            result = inspect(args.file, reveal=args.reveal)
+        elif args.command == "approve-packet":
+            result = approve(
+                args.file, packet_id=args.packet_id, packet_hash=args.hash,
+                student_confirmed=args.yes,
+            )
         elif args.command == "purge":
             with connect(args.db) as db:
                 count = purge_student(db, args.student_id)
