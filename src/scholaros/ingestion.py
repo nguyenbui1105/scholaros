@@ -24,8 +24,13 @@ MAX_BYTES = 2_000_000
 
 
 class SourceConnector(Protocol):
-    provider: str
-    url: str
+    """Read-only connector contract compatible with frozen provider dataclasses."""
+
+    @property
+    def provider(self) -> str: ...
+
+    @property
+    def url(self) -> str: ...
 
 
 @dataclass(frozen=True)
