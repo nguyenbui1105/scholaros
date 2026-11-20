@@ -1,0 +1,27 @@
+{
+  "student": {
+    "student_id": "synthetic-demo",
+    "academic_level": "undergraduate",
+    "visa_status": "F-1",
+    "school": "Demo College",
+    "majors": [
+      "computer science"
+    ],
+    "gpa": 3.8,
+    "consent_to_store": true
+  },
+  "evidence": [
+    {
+      "id": "demo-fact",
+      "student_id": "synthetic-demo",
+      "statement": "I practiced programming every day.",
+      "confirmed_by_student": true
+    },
+    {
+      "id": "unconfirmed",
+      "student_id": "synthetic-demo",
+      "statement": "I received a national innovation award.",
+      "confirmed_by_student": false
+    }
+  ]
+}
