@@ -48,3 +48,9 @@ CI enforces Ruff lint/format, mypy --strict on src/, Python 3.11/3.12, pytest >=
 - Real-world precision, recall, false-ELIGIBLE rate, UNKNOWN/NEEDS_VERIFICATION rates, live p95 latency, throughput and API costs are therefore **unmeasured**, not 100%.
 - Offline synthetic stage timing is available via `scholaros perf`; quantitative results should be reported with run/environment context after CI.
 - The v0.2.0 release tag is unchanged; these are unreleased main/feature branch changes until independently accepted.
+
+## v0.3.1 verified framework test (CI 44699908310)
+- **154 passing automated tests**, **85.49% statement coverage** on the Python 3.12 runner.
+- Python 3.11/3.12, Ruff lint/format, `mypy --strict`, dependency audit and Gitleaks pass.
+- Offline synthetic benchmark p50/p95 and throughput are reported in [V031_BENCHMARK_RESULTS.md](V031_BENCHMARK_RESULTS.md).
+- **0 verified live-page corpus files, 0 independent real human gold labels, 0 validated model-versus-real-source eligible predictions.** Therefore real-world metrics are **unmeasured**. This milestone delivers the evaluation framework, not completion of the human data campaign.
