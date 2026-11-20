@@ -1,15 +1,16 @@
 """Contracts for source-driven research: test-first, no real award claims."""
+
+import json
+import subprocess
+import sys
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 from pathlib import Path
-import json
-import subprocess
-import sys
 
 import pytest
 
-from scholaros.ingestion import PCCFoundationConnector, OregonStudentAidConnector
+from scholaros.ingestion import OregonStudentAidConnector, PCCFoundationConnector
 from scholaros.models import Decision
 from scholaros.records import SourceSnapshot
 from scholaros.research import analyze_snapshot, persist_public_snapshot, research_provider
@@ -18,8 +19,9 @@ from scholaros.storage import connect
 NOW = datetime(2026, 11, 19, 12, 0, tzinfo=UTC)
 
 
-def snapshot(provider: str = "pcc", body: str = "F-1 students may apply. Deadline: 2027-02-01."
-             ) -> SourceSnapshot:
+def snapshot(
+    provider: str = "pcc", body: str = "F-1 students may apply. Deadline: 2027-02-01."
+) -> SourceSnapshot:
     connector = PCCFoundationConnector() if provider == "pcc" else OregonStudentAidConnector()
     return SourceSnapshot.from_text(connector.url, body, NOW)
 
@@ -45,9 +47,11 @@ def test_every_candidate_has_exact_evidence_and_hash() -> None:
 
 
 def test_negated_or_excluded_candidate_is_suppressed() -> None:
-    for text in ("F-1 students may apply except applicants holding F-1 visas.",
-                 "F-1 students are eligible excluding international students.",
-                 "F-1 students are not eligible."):
+    for text in (
+        "F-1 students may apply except applicants holding F-1 visas.",
+        "F-1 students are eligible excluding international students.",
+        "F-1 students are not eligible.",
+    ):
         report = analyze_snapshot("pcc", snapshot(body=text), now=NOW)
         assert not any(x["field"] == "international" for x in report.candidates)
         assert report.decision is Decision.NEEDS_VERIFICATION
@@ -103,14 +107,25 @@ def test_offline_cached_snapshot_has_no_verification_promotion(tmp_path: Path) -
     assert result["verified_awards"] == 0
     assert result["candidates"]
 
+
 def test_cli_research_cached_requires_no_network(tmp_path: Path) -> None:
     saved = snapshot()
     cached = tmp_path / (sha256(saved.source_url.encode()).hexdigest() + ".json")
     cached.write_text(saved.model_dump_json(), encoding="utf-8")
     run = subprocess.run(
-        [sys.executable, "-m", "scholaros", "research", "pcc", "--cache-dir",
-         str(tmp_path), "--json"],
-        capture_output=True, text=True, check=True,
+        [
+            sys.executable,
+            "-m",
+            "scholaros",
+            "research",
+            "pcc",
+            "--cache-dir",
+            str(tmp_path),
+            "--json",
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
     )
     payload = json.loads(run.stdout)
     assert payload["decision"] == "needs_verification"
@@ -120,9 +135,18 @@ def test_cli_research_cached_requires_no_network(tmp_path: Path) -> None:
 
 def test_cli_research_offline_cache_miss_is_helpful(tmp_path: Path) -> None:
     run = subprocess.run(
-        [sys.executable, "-m", "scholaros", "research", "pcc",
-         "--cache-dir", str(tmp_path), "--json"],
-        capture_output=True, text=True,
+        [
+            sys.executable,
+            "-m",
+            "scholaros",
+            "research",
+            "pcc",
+            "--cache-dir",
+            str(tmp_path),
+            "--json",
+        ],
+        capture_output=True,
+        text=True,
     )
     assert run.returncode == 2
     assert "Offline cache miss" in run.stderr

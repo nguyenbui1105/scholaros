@@ -110,15 +110,17 @@ def analyze_snapshot(
             if candidate.quote not in snapshot.text:
                 issues.append(f"quote_missing:{candidate.field}")
                 continue
-            output.append({
-                "field": candidate.field,
-                "value": candidate.value,
-                "quote": candidate.quote,
-                "source_url": candidate.source_url,
-                "content_hash": candidate.content_hash,
-                "retrieved_at": candidate.retrieved_at.isoformat(),
-                "status": "unverified",
-            })
+            output.append(
+                {
+                    "field": candidate.field,
+                    "value": candidate.value,
+                    "quote": candidate.quote,
+                    "source_url": candidate.source_url,
+                    "content_hash": candidate.content_hash,
+                    "retrieved_at": candidate.retrieved_at.isoformat(),
+                    "status": "unverified",
+                }
+            )
     return ResearchReport(
         provider=connector.provider,
         source_url=snapshot.source_url,
@@ -141,8 +143,12 @@ def persist_public_snapshot(db: sqlite3.Connection, snapshot: SourceSnapshot) ->
             """INSERT OR IGNORE INTO public_snapshots
             (content_hash, source_url, retrieved_at, content_text)
             VALUES (?, ?, ?, ?)""",
-            (snapshot.content_hash, snapshot.source_url, snapshot.retrieved_at.isoformat(),
-             snapshot.text),
+            (
+                snapshot.content_hash,
+                snapshot.source_url,
+                snapshot.retrieved_at.isoformat(),
+                snapshot.text,
+            ),
         )
 
 
