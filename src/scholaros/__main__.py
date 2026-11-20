@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .research import research_provider
 from .storage import connect, export_schemas, purge_student
 from .workflow import run_stage
 
@@ -26,6 +27,16 @@ def main() -> None:
             item.add_argument("opportunity_id")
         if name in {"review", "packet"}:
             item.add_argument("--text", help="Draft text to check against confirmed evidence")
+    research = sub.add_parser(
+        "research", help="Inspect a registered public application page (no eligibility promotion)"
+    )
+    research.add_argument("provider", choices=["pcc", "osac"])
+    research.add_argument("--json", action="store_true")
+    research.add_argument("--cache-dir", type=Path, default=Path(".scholaros/cache"))
+    research.add_argument(
+        "--allow-network", action="store_true", help="Opt-in robots-aware official fetch"
+    )
+    research.add_argument("--db", type=Path, help="Optional local public-source SQLite store")
     init = sub.add_parser("init")
     init.add_argument("--json", action="store_true")
     init.add_argument("--db", type=Path, default=Path(".scholaros/scholaros.db"))
@@ -46,6 +57,13 @@ def main() -> None:
         elif args.command == "schemas":
             export_schemas(args.out)
             result = {"exported_to": str(args.out)}
+        elif args.command == "research":
+            result = research_provider(
+                args.provider,
+                cache_dir=args.cache_dir,
+                live=args.allow_network,
+                database=args.db,
+            )
         elif args.command == "purge":
             with connect(args.db) as db:
                 count = purge_student(db, args.student_id)
