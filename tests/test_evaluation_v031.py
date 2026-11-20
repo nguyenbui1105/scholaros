@@ -113,11 +113,17 @@ def test_missing_prediction_counts_as_abstention() -> None:
 
 
 def test_false_eligible_is_measured() -> None:
+    source = snapshot().text.replace("F-1 students may apply", "F-1 students are ineligible")
+    negative_snapshot = SourceSnapshot.from_text(URL, source, DATE)
     neg = label("a", decision="ineligible").model_copy(
-        update={"field_labels": {**label("a").field_labels, "visa": "ineligible"}}
+        update={
+            "content_hash": negative_snapshot.content_hash,
+            "field_labels": {**label("a").field_labels, "visa": "ineligible"},
+            "evidence_quotes": {**QUOTES, "visa": "F-1 students are ineligible"},
+        }
     )
     neg2 = neg.model_copy(update={"reviewer_id": "b"})
-    gold = adjudicate([neg, neg2], {"synthetic-1": snapshot()})
+    gold = adjudicate([neg, neg2], {"synthetic-1": negative_snapshot})
     metrics = evaluate_predictions(gold, [Prediction(case_id="synthetic-1", decision="eligible")])
     assert metrics["false_eligible_count"] == 1
     assert metrics["false_eligible_rate"] == 1.0
