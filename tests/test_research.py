@@ -3,7 +3,6 @@
 import json
 import subprocess
 import sys
-from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 from pathlib import Path
@@ -66,7 +65,7 @@ def test_mismatched_source_url_is_rejected() -> None:
 def test_tampered_digest_is_rejected() -> None:
     s = snapshot()
     with pytest.raises(ValueError, match="digest"):
-        analyze_snapshot("pcc", replace(s, content_hash="a" * 64), now=NOW)
+        analyze_snapshot("pcc", s.model_copy(update={"content_hash": "a" * 64}), now=NOW)
 
 
 def test_stale_snapshot_flags_review_and_suppresses_candidates() -> None:
