@@ -3,6 +3,9 @@ from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 from pathlib import Path
+import json
+import subprocess
+import sys
 
 import pytest
 
@@ -99,3 +102,27 @@ def test_offline_cached_snapshot_has_no_verification_promotion(tmp_path: Path) -
     assert result["source_origin"] == "offline_cache_untrusted"
     assert result["verified_awards"] == 0
     assert result["candidates"]
+
+def test_cli_research_cached_requires_no_network(tmp_path: Path) -> None:
+    saved = snapshot()
+    cached = tmp_path / (sha256(saved.source_url.encode()).hexdigest() + ".json")
+    cached.write_text(saved.model_dump_json(), encoding="utf-8")
+    run = subprocess.run(
+        [sys.executable, "-m", "scholaros", "research", "pcc", "--cache-dir",
+         str(tmp_path), "--json"],
+        capture_output=True, text=True, check=True,
+    )
+    payload = json.loads(run.stdout)
+    assert payload["decision"] == "needs_verification"
+    assert payload["submission_status"] == "NOT_SUBMITTED"
+    assert payload["verified_awards"] == 0
+
+
+def test_cli_research_offline_cache_miss_is_helpful(tmp_path: Path) -> None:
+    run = subprocess.run(
+        [sys.executable, "-m", "scholaros", "research", "pcc",
+         "--cache-dir", str(tmp_path), "--json"],
+        capture_output=True, text=True,
+    )
+    assert run.returncode == 2
+    assert "Offline cache miss" in run.stderr
