@@ -85,19 +85,26 @@ def parse_award(
         if context is None or _has_negation(context):
             queue.append(f"Conflicting or negated rule near {item.field}")
             continue
-        candidates.append({
-            "field": item.field, "value": item.value, "quote": item.quote,
-            "source_url": url, "content_hash": snapshot.content_hash,
-            "status": "unverified",
-        })
-    queue.extend([
-        "Confirm that the URL belongs to the actual award provider and this is the current cycle",
-        "Verify F-1 / international student eligibility including citizenship and residency",
-        "Verify GPA, school, academic level, major, and all additional award conditions",
-        "Confirm deadline, timezone, award amount, and required documents",
-        "Check provider AI-writing policy and obtain human approval of the final essay",
-        "Review the official application portal and submit manually; no submission performed",
-    ])
+        candidates.append(
+            {
+                "field": item.field,
+                "value": item.value,
+                "quote": item.quote,
+                "source_url": url,
+                "content_hash": snapshot.content_hash,
+                "status": "unverified",
+            }
+        )
+    queue.extend(
+        [
+            "Confirm that the URL belongs to the actual award provider and this is the current cycle",
+            "Verify F-1 / international student eligibility including citizenship and residency",
+            "Verify GPA, school, academic level, major, and all additional award conditions",
+            "Confirm deadline, timezone, award amount, and required documents",
+            "Check provider AI-writing policy and obtain human approval of the final essay",
+            "Review the official application portal and submit manually; no submission performed",
+        ]
+    )
     award_id = sha256((url + "\n" + snapshot.content_hash).encode("utf-8")).hexdigest()[:24]
     return ImportedAward(
         id=award_id,
@@ -121,9 +128,7 @@ def load_awards(path: Path) -> list[ImportedAward]:
     return [ImportedAward.model_validate(item) for item in records]
 
 
-def import_award(
-    path: Path, *, title: str, source_url: str, source_text: str
-) -> ImportedAward:
+def import_award(path: Path, *, title: str, source_url: str, source_text: str) -> ImportedAward:
     award = parse_award(title=title, source_url=source_url, source_text=source_text)
     records = load_awards(path)
     if any(item.id == award.id for item in records):
@@ -141,16 +146,18 @@ def summarize_awards(path: Path, *, search: str = "") -> list[dict[str, Any]]:
     for award in load_awards(path):
         if term not in (award.title + " " + award.source_url).casefold():
             continue
-        output.append({
-            "id": award.id,
-            "title": award.title,
-            "source_url": award.source_url,
-            "content_hash": award.content_hash,
-            "origin": award.origin,
-            "decision": award.decision,
-            "submission_status": award.submission_status,
-            "candidates": [dict(item) for item in award.candidates],
-            "review_queue": list(award.review_queue),
-            "imported_at": award.imported_at.isoformat(),
-        })
+        output.append(
+            {
+                "id": award.id,
+                "title": award.title,
+                "source_url": award.source_url,
+                "content_hash": award.content_hash,
+                "origin": award.origin,
+                "decision": award.decision,
+                "submission_status": award.submission_status,
+                "candidates": [dict(item) for item in award.candidates],
+                "review_queue": list(award.review_queue),
+                "imported_at": award.imported_at.isoformat(),
+            }
+        )
     return output

@@ -29,7 +29,9 @@ TEXT = (
 
 def test_real_source_input_stays_unverified() -> None:
     award = parse_award(
-        title="Individual STEM Scholarship", source_url=URL, source_text=TEXT,
+        title="Individual STEM Scholarship",
+        source_url=URL,
+        source_text=TEXT,
         imported_at=datetime(2026, 11, 22, tzinfo=UTC),
     )
     assert isinstance(award, ImportedAward)
@@ -70,7 +72,8 @@ def test_short_text_and_missing_title_fail() -> None:
 
 def test_negation_suppresses_positive_candidate() -> None:
     award = parse_award(
-        title="Exclusive Award", source_url=URL,
+        title="Exclusive Award",
+        source_url=URL,
         source_text=(
             "F-1 students may apply except those holding F-1 visas. "
             "Other criteria include local residency and citizenship requirements."
@@ -97,7 +100,9 @@ def test_encrypted_registry_duplicate_and_versioning(
     again = import_award(path, title="Individual award", source_url=URL, source_text=TEXT)
     assert one.id == again.id
     newer = import_award(
-        path, title="Individual award", source_url=URL,
+        path,
+        title="Individual award",
+        source_url=URL,
         source_text=TEXT + " Newly updated application instructions this cycle.",
     )
     assert one.id != newer.id
@@ -137,26 +142,48 @@ def test_source_import_ui_requires_auth_csrf_and_escapes_html(
     )
     client = TestClient(app, base_url="http://localhost")
     assert client.get("/my-sources", follow_redirects=False).status_code == 303
-    assert client.post("/my-sources", data={
-        "title": "Award", "source_url": URL, "source_text": TEXT
-    }).status_code == 403
+    assert (
+        client.post(
+            "/my-sources", data={"title": "Award", "source_url": URL, "source_text": TEXT}
+        ).status_code
+        == 403
+    )
     assert client.post("/unlock", data={"access_code": "a-long-secret-code"}).status_code == 200
-    assert client.post("/my-sources", data={
-        "title": "Award", "source_url": URL, "source_text": TEXT
-    }).status_code == 403
+    assert (
+        client.post(
+            "/my-sources", data={"title": "Award", "source_url": URL, "source_text": TEXT}
+        ).status_code
+        == 403
+    )
     import re
 
     home = client.get("/").text
     match = re.search(r'name="csrf" value="([^"]+)"', home)
     assert match
     token = match.group(1)
-    assert client.post("/my-sources", data={
-        "csrf": token, "title": "Award", "source_url": URL, "source_text": TEXT,
-    }, headers={"Origin": "https://evil.example"}).status_code == 403
-    response = client.post("/my-sources", data={
-        "csrf": token, "title": "<script>alert(1)</script>",
-        "source_url": URL, "source_text": TEXT,
-    }, follow_redirects=False)
+    assert (
+        client.post(
+            "/my-sources",
+            data={
+                "csrf": token,
+                "title": "Award",
+                "source_url": URL,
+                "source_text": TEXT,
+            },
+            headers={"Origin": "https://evil.example"},
+        ).status_code
+        == 403
+    )
+    response = client.post(
+        "/my-sources",
+        data={
+            "csrf": token,
+            "title": "<script>alert(1)</script>",
+            "source_url": URL,
+            "source_text": TEXT,
+        },
+        follow_redirects=False,
+    )
     assert response.status_code == 303
     output = client.get("/my-sources")
     assert "&lt;script&gt;alert(1)&lt;/script&gt;" in output.text

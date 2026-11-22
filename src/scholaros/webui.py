@@ -366,7 +366,6 @@ def create_app(
         )
         return _html("Scholarship sources", intro + "".join(cards))
 
-
     @app.get("/my-sources", response_class=HTMLResponse)
     async def my_sources(request: Request) -> Response:
         denied = gate(request)
@@ -377,29 +376,32 @@ def create_app(
         cards: list[str] = []
         for award in awards:
             evidence = "".join(
-                "<li><strong>" + _text(item["field"]) + "</strong>: "
-                + _text(item["quote"]) + " (unverified)</li>"
+                "<li><strong>"
+                + _text(item["field"])
+                + "</strong>: "
+                + _text(item["quote"])
+                + " (unverified)</li>"
                 for item in award["candidates"]
             )
             checks = "".join("<li>" + _text(item) + "</li>" for item in award["review_queue"])
             cards.append(
                 '<article class="panel"><span class="pill">NEEDS_VERIFICATION</span>'
-                f'<h2>{_text(award["title"])}</h2>'
+                f"<h2>{_text(award['title'])}</h2>"
                 f'<p><a href="{_text(award["source_url"])}" '
                 'target="_blank" rel="noopener noreferrer">Open source in browser</a></p>'
                 f'<p class="note">Pasted text · SHA-256: {_text(award["content_hash"])}</p>'
-                '<details><summary>Candidate quotes (not verified rules)</summary>'
-                f'<ul>{evidence or "<li>No rules extracted</li>"}</ul>'
-                '</details><details><summary>Human verification checklist</summary>'
-                f'<ul>{checks}</ul></details>'
+                "<details><summary>Candidate quotes (not verified rules)</summary>"
+                f"<ul>{evidence or '<li>No rules extracted</li>'}</ul>"
+                "</details><details><summary>Human verification checklist</summary>"
+                f"<ul>{checks}</ul></details>"
                 '<p class="note">NOT_SUBMITTED · No eligibility claim or receipt</p>'
-                '</article>'
+                "</article>"
             )
         content = (
             "<h1>My scholarship research</h1>"
             '<p class="lead">Paste text from an individual scholarship page you are '
-            'allowed to use. We encrypt the text and extract candidate evidence only. '
-            'No URL fetching or automatic F-1 eligibility decisions.</p>'
+            "allowed to use. We encrypt the text and extract candidate evidence only. "
+            "No URL fetching or automatic F-1 eligibility decisions.</p>"
             '<div class="warn">Every imported award remains NEEDS_VERIFICATION.</div>'
             '<section class="panel"><h2>Import an individual award</h2>'
             '<form method="post" action="/my-sources">'
@@ -423,7 +425,8 @@ def create_app(
             return HTMLResponse("Forbidden", status_code=403)
         try:
             import_award(
-                research_store, title=_field(form, "title"),
+                research_store,
+                title=_field(form, "title"),
                 source_url=_field(form, "source_url"),
                 source_text=_field(form, "source_text"),
             )
