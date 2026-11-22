@@ -25,6 +25,8 @@ jobs:
         run: ruff format --check src tests
       - name: Strict typing
         run: mypy --strict src/
+      - name: Local web UI command smoke test
+        run: python -m scholaros web --help
       - name: Skill contract consistency
         run: python scripts/verify_skills.py
       - name: Offline tests with 85% minimum coverage
