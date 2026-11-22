@@ -79,3 +79,9 @@ CI enforces Ruff lint/format, mypy --strict on src/, Python 3.11/3.12, pytest >=
 - Text and page hashes are encrypted locally, and new page revisions are not overwritten. Searchable summaries include exact unverified rule quotes and an explicit manual verification queue.
 - Institution-like HTTPS URL checks are a plausibility screen, not provider authentication. Browser content is escaped and CSRF/authentication checks remain required.
 - Imported pages **never** become `ELIGIBLE` or `SUBMITTED` through this feature. Real-provider eligibility matching, automated collection and authorized form submission are still incomplete.
+
+## v0.6 verified on GitHub Actions (2026-11-22)
+- Feature-branch [CI #45085108071](https://github.com/nguyenbui1105/scholaros/actions/runs/45085108071): **196 passing tests**, **86.83% statement coverage** (Python 3.11), Python 3.12 success, Ruff lint/format, mypy strict, dependency audit and Gitleaks all passed.
+- Browser flow tested: authenticated individual-award intake, anti-CSRF, HTML escaping, encrypted deduplication, content hashes, source-specific manual review, and display in Applications with no automatic eligibility or submission.
+- Fixed a probabilistic/flaky legacy encryption assertion: encrypted Base64 ciphertext can coincidentally contain a short plaintext substring, so tests now check successful authenticated Fernet decryption instead of substring absence.
+- **No real-world validated award catalog, automatic eligibility score or authorized submission connector.** This remains an evidence-first assisted workflow, not a fully autonomous application service.
