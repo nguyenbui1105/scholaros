@@ -94,10 +94,11 @@ def _input(
     label: str, field: str, value: object = "", *, required: bool = False, kind: str = "text"
 ) -> str:
     req = " required" if required else ""
+    number_opts = ' step="any" min="0" max="4"' if kind == "number" else ""
     return (
         f'<label for="{field}">{_text(label)}</label>'
         f'<input id="{field}" name="{field}" type="{kind}" '
-        f'value="{_text(value)}"{req}>'
+        f'value="{_text(value)}"{req}{number_opts}>'
     )
 
 
