@@ -67,7 +67,10 @@ def _quote_context_verified(text: str, quote: str | None, field: str) -> str:
     context = _quote_context(text, quote)
     if context is None:
         raise ValueError(f"Missing or nonverbatim {field} quote")
-    if _has_negation(context) or re.search(\n        r"\\b(?:not\\s+open\\s+to|not\\s+available\\s+to|does\\s+not\\s+accept)\\b",\n        context, re.IGNORECASE,\n    ):
+    if _has_negation(context) or re.search(
+        r"\b(?:not\s+open\s+to|not\s+available\s+to|does\s+not\s+accept)\b",
+        context, re.IGNORECASE,
+    ):
         raise ValueError(f"Ambiguous or negative {field} rule near quoted text")
     return context
 
