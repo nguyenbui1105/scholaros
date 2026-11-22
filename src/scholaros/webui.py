@@ -24,8 +24,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from .profile_triage import ReviewedConstraint, compare_profile, load_reviews, save_review
 from .records import EvidenceItem, StudentProfile
-from .source_intake import load_awards
-from .source_intake import import_award, summarize_awards
+from .source_intake import import_award, load_awards, summarize_awards
 from .workspace import ApplicantBundle, load_private, save_private
 from .workspace_cli import approve, execute
 

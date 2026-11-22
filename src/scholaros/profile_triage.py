@@ -8,7 +8,6 @@ field value, with exceptions in its sentence rejected.
 
 from __future__ import annotations
 
-import json
 import re
 from datetime import date
 from hashlib import sha256
