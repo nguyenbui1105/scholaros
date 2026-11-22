@@ -1,0 +1,33 @@
+name: v0.5 one-time Ruff format
+on:
+  push:
+    paths:
+      - '.github/workflows/v05-format-once.yml'
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.ref == 'refs/heads/feat/v05-local-student-ui'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/v05-local-student-ui
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install ruff==0.17.5
+      - name: Ruff lint fix and format
+        run: |
+          ruff check --fix src tests
+          ruff format src tests
+      - name: Commit corrected format
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src tests
+          if ! git diff --cached --quiet; then
+            git commit -m "style(v0.5): apply Ruff to student browser UI"
+            git push origin HEAD:feat/v05-local-student-ui
+          fi
