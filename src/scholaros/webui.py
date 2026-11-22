@@ -457,14 +457,23 @@ def create_app(
         denied = gate(request)
         if denied:
             return denied
-        if not packets_path.is_file():
-            return _html(
-                "Applications",
-                '<h1>Application packets</h1><section class="panel">'
-                "No packets yet. Create a profile, then run the demo workflow.</section>",
-            )
-        state = load_private(packets_path)
+        researched = summarize_awards(research_store)
+        state = load_private(packets_path) if packets_path.is_file() else {"applications": []}
         cards: list[str] = []
+        for award in researched:
+            checks = "".join(
+                "<li>" + _text(item) + "</li>" for item in award["review_queue"]
+            )
+            cards.append(
+                '<article class="panel"><span class="pill">NEEDS_VERIFICATION</span>'
+                f'<h2>{_text(award["title"])}</h2>'
+                '<p class="note">Imported actual-page research, NOT_SUBMITTED. '
+                'No eligibility verification or application packet yet.</p>'
+                '<details><summary>Required human checks</summary>'
+                f'<ul>{checks}</ul></details>'
+                '<a href="/my-sources">Review original source and evidence</a>'
+                '</article>'
+            )
         for packet in state.get("applications", []):
             eligibility = str(packet.get("eligibility", "needs_verification"))
             reasons = "".join(
@@ -505,6 +514,11 @@ def create_app(
             '<div class="warn"><strong>NOT SUBMITTED.</strong> This local demo uses '
             "a fictional catalog. Approval never sends any application to a provider.</div>"
         )
+        if not cards:
+            cards.append(
+                '<section class="panel">No applications or imported awards yet. '
+                'Add a real award in My researched awards or try the fictional demo.</section>'
+            )
         return _html("Applications", prefix + "".join(cards))
 
     @app.post("/approve")
