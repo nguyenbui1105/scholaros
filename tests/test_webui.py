@@ -46,7 +46,7 @@ def test_anonymous_and_wrong_code_never_reveal_profile(
     session: tuple[TestClient, str, Path],
 ) -> None:
     client, secret, _ = session
-    assert client.get("/").status_code == 303
+    assert client.get("/", follow_redirects=False).status_code == 303
     assert "Access code" in client.get("/unlock").text
     assert client.post("/unlock", data={"access_code": "wrong"}).status_code == 403
     assert (
@@ -148,9 +148,11 @@ def test_escaped_markup_and_unverified_source_labels(session: tuple[TestClient, 
         follow_redirects=False,
     )
     assert response.status_code == 303
-    homepage = client.get("/")
-    assert malicious not in homepage.text
-    assert "<script>alert" not in homepage.text
+    profile_page = client.get("/profile")
+    assert malicious not in profile_page.text
+    assert "&lt;script&gt;" in profile_page.text
+    assert "<script>alert" not in profile_page.text
+    assert 'step="any"' in profile_page.text
     sources = client.get("/sources?q=pcc")
     assert sources.status_code == 200
     assert "candidate_unreviewed_terms" in sources.text
