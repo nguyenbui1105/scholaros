@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import secrets
 import sys
 from datetime import date
 from pathlib import Path
@@ -94,6 +95,12 @@ def main() -> None:
     approval.add_argument("--hash", required=True)
     approval.add_argument("--yes", action="store_true", help="Explicit applicant confirmation")
     approval.add_argument("--json", action="store_true")
+    web = sub.add_parser("web", help="Open a private localhost-only student dashboard")
+    web.add_argument("--port", type=int, default=8765, help="Loopback port (default 8765)")
+    web.add_argument("--catalog", type=Path,
+                     default=Path("examples/agent_demo_catalog.json"))
+    web.add_argument("--sources", type=Path,
+                     default=Path("examples/source_discovery_seeds.json"))
     init = sub.add_parser("init")
     init.add_argument("--json", action="store_true")
     init.add_argument("--db", type=Path, default=Path(".scholaros/scholaros.db"))
@@ -147,6 +154,27 @@ def main() -> None:
             )
         elif args.command == "audit-corpus":
             result = audit_offline_dir(args.snapshots, min_pages=args.min_pages)
+        elif args.command == "web":
+            if not 1024 <= args.port <= 65535:
+                raise ValueError("Select an unprivileged TCP port (1024–65535)")
+            try:
+                import uvicorn
+                from .webui import create_app
+            except ImportError as exc:
+                raise RuntimeError('Install ScholarOS with pip install -e ".[web]"') from exc
+            code = secrets.token_urlsafe(24)
+            application = create_app(
+                access_code=code,
+                profile_path=Path(".scholaros/profile.enc"),
+                packets_path=Path(".scholaros/applications.enc"),
+                catalog_path=args.catalog,
+                sources_path=args.sources,
+            )
+            print(f"Open http://127.0.0.1:{args.port}/unlock", flush=True)
+            print(f"Your one-time local access code: {code}", flush=True)
+            print("Only listens on 127.0.0.1. Never share this code.", flush=True)
+            uvicorn.run(application, host="127.0.0.1", port=args.port)
+            return
         elif args.command == "onboard":
             result = enroll(args.out, profile_json=args.profile_json)
         elif args.command == "autopilot":
