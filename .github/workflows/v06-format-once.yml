@@ -31,3 +31,5 @@ jobs:
             git commit -m "style(v0.6): apply Ruff formatting"
             git push origin HEAD:feat/v06-real-source-intake
           fi
+
+# Re-run formatter after application dashboard integration
