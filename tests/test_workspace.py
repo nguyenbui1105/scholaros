@@ -178,10 +178,12 @@ def test_encrypted_private_workspace_requires_key_and_consent(
     path = tmp_path / "student.enc"
     with pytest.raises(RuntimeError):
         save_private(path, data.model_dump())
-    monkeypatch.setenv("SCHOLAROS_FERNET_KEY", Fernet.generate_key().decode())
+    key = Fernet.generate_key()
+    monkeypatch.setenv("SCHOLAROS_FERNET_KEY", key.decode())
     save_private(path, data.model_dump())
-    assert path.read_bytes().startswith(b"gAAAA")
-    assert b"F-1" not in path.read_bytes()
+    ciphertext = path.read_bytes()
+    assert ciphertext.startswith(b"gAAAA")
+    assert Fernet(key).decrypt(ciphertext)
     assert load_private(path)["student"]["visa_status"] == "F-1"
 
 
