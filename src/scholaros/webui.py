@@ -23,6 +23,7 @@ from starlette.datastructures import FormData
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from .records import EvidenceItem, StudentProfile
+from .source_intake import import_award, summarize_awards
 from .workspace import ApplicantBundle, load_private, save_private
 from .workspace_cli import approve, execute
 
@@ -74,6 +75,7 @@ def _html(title: str, contents: str, *, authenticated: bool = True) -> HTMLRespo
     nav = (
         '<nav><a href="/">Dashboard</a><a href="/profile">My profile</a>'
         '<a href="/sources">Scholarship sources</a>'
+        '<a href="/my-sources">My researched awards</a>'
         '<a href="/applications">Applications</a></nav>'
         if authenticated
         else ""
@@ -109,10 +111,12 @@ def create_app(
     packets_path: Path,
     catalog_path: Path,
     sources_path: Path,
+    imported_sources_path: Path | None = None,
 ) -> FastAPI:
     """Create one local user instance. This is NOT a public multi-user service."""
     if not os.environ.get("SCHOLAROS_FERNET_KEY"):
         raise RuntimeError("SCHOLAROS_FERNET_KEY must be configured before web startup")
+    research_store = imported_sources_path or profile_path.parent / "source_awards.enc"
     if len(access_code) < 8:
         raise ValueError("Local access code is too short")
     app = FastAPI(
@@ -227,7 +231,8 @@ def create_app(
             '<section class="panel"><span class="pill">Step 2</span>'
             "<h2>Scholarship sources</h2><p>Explore institutional starting points "
             "with explicit source-verification warnings.</p>"
-            '<a class="button secondary" href="/sources">Browse sources</a></section>'
+            '<a class="button secondary" href="/sources">Browse sources</a>'
+            '<a class="button secondary" href="/my-sources">Import an award page</a></section>'
             '<section class="panel"><span class="pill">Step 3</span>'
             "<h2>Agent workflow</h2>"
             f"<p>{('Review packets below' if packets_exist else 'Prepare a review packet')}</p>"
@@ -360,6 +365,74 @@ def create_app(
             '<button type="submit">Search sources</button></form>'
         )
         return _html("Scholarship sources", intro + "".join(cards))
+
+
+    @app.get("/my-sources", response_class=HTMLResponse)
+    async def my_sources(request: Request) -> Response:
+        denied = gate(request)
+        if denied:
+            return denied
+        query = (request.query_params.get("q") or "").strip()[:80]
+        awards = summarize_awards(research_store, search=query)
+        cards: list[str] = []
+        for award in awards:
+            evidence = "".join(
+                "<li><strong>" + _text(item["field"]) + "</strong>: "
+                + _text(item["quote"]) + " (unverified)</li>"
+                for item in award["candidates"]
+            )
+            checks = "".join("<li>" + _text(item) + "</li>" for item in award["review_queue"])
+            cards.append(
+                '<article class="panel"><span class="pill">NEEDS_VERIFICATION</span>'
+                f'<h2>{_text(award["title"])}</h2>'
+                f'<p><a href="{_text(award["source_url"])}" '
+                'target="_blank" rel="noopener noreferrer">Open source in browser</a></p>'
+                f'<p class="note">Pasted text · SHA-256: {_text(award["content_hash"])}</p>'
+                '<details><summary>Candidate quotes (not verified rules)</summary>'
+                f'<ul>{evidence or "<li>No rules extracted</li>"}</ul>'
+                '</details><details><summary>Human verification checklist</summary>'
+                f'<ul>{checks}</ul></details>'
+                '<p class="note">NOT_SUBMITTED · No eligibility claim or receipt</p>'
+                '</article>'
+            )
+        content = (
+            "<h1>My scholarship research</h1>"
+            '<p class="lead">Paste text from an individual scholarship page you are '
+            'allowed to use. We encrypt the text and extract candidate evidence only. '
+            'No URL fetching or automatic F-1 eligibility decisions.</p>'
+            '<div class="warn">Every imported award remains NEEDS_VERIFICATION.</div>'
+            '<section class="panel"><h2>Import an individual award</h2>'
+            '<form method="post" action="/my-sources">'
+            + csrf()
+            + _input("Scholarship title", "title", required=True)
+            + _input("Official HTTPS URL", "source_url", required=True)
+            + '<label for="source_text">Text from public award page</label>'
+            '<textarea id="source_text" name="source_text" rows="9" required '
+            'maxlength="120000"></textarea>'
+            '<button type="submit">Save encrypted source</button></form></section>'
+            '<form method="get" action="/my-sources"><label for="q">Filter imported awards</label>'
+            f'<input id="q" name="q" value="{_text(query)}">'
+            '<button type="submit">Search</button></form>'
+        )
+        return _html("My researched awards", content + "".join(cards))
+
+    @app.post("/my-sources")
+    async def add_source(request: Request) -> Response:
+        form = await request.form()
+        if not safe_post(request, form):
+            return HTMLResponse("Forbidden", status_code=403)
+        try:
+            import_award(
+                research_store, title=_field(form, "title"),
+                source_url=_field(form, "source_url"),
+                source_text=_field(form, "source_text"),
+            )
+        except (OSError, ValueError, RuntimeError):
+            return HTMLResponse(
+                "Source rejected: check institutional URL and pasted page text",
+                status_code=400,
+            )
+        return RedirectResponse("/my-sources", status_code=303)
 
     @app.post("/run")
     async def run_agents(request: Request) -> Response:
