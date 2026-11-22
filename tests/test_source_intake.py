@@ -191,4 +191,8 @@ def test_source_import_ui_requires_auth_csrf_and_escapes_html(
     assert "NEEDS_VERIFICATION" in output.text
     assert "NOT_SUBMITTED" in output.text
     assert "F-1 students may apply" in output.text
+    applications = client.get("/applications")
+    assert "NEEDS_VERIFICATION" in applications.text
+    assert "No eligibility verification or application packet yet" in applications.text
+    assert "NOT_SUBMITTED" in applications.text
     assert len(load_awards(tmp_path / "source_awards.enc")) == 1
