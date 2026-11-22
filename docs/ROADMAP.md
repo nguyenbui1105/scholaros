@@ -59,6 +59,16 @@
 See [web UI guide](WEB_UI.md) and [implementation plan](V05_PLAN.md).
 **Local browser does not mean production SaaS readiness.**
 
+## v0.6 — real award page intake (manual review beta)
+- [x] Paste individual award URL and page content into localhost dashboard
+- [x] Encrypt versioned source snapshots with hash and submission-safe statuses
+- [x] Extract literal tentative requirements and build human review queue
+- [ ] Fetch current award pages automatically only where permission/terms allow
+- [ ] Independently verify award-by-award source rules and student eligibility
+- [ ] Connect approved award cases to actual provider-specific applications
+- [ ] Generate complete student-reviewed essays and evidence packets where allowed
+- [ ] Permitted submission adapters, exact destination approval and verified receipts
+
 ## Next — grounded public-source beta
 - [ ] Independent real-source authority/permission validation and repeatable robots compliance
 - [ ] Manually adjudicated eligibility cases from multiple providers (F-1, citizenship, enrollment conditions)

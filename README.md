@@ -38,6 +38,21 @@
 
 See [precise status](docs/STATUS.md). A real optional OpenAI SDK adapter exists but has **no live integration test**.
 
+## 🧭 v0.6 Individual-award research intake (unreleased)
+
+Instead of being limited to a fictional award catalog, the localhost dashboard
+now has **My researched awards**: paste the URL and content of a real
+individual scholarship page you are permitted to use. ScholarOS encrypts the
+stored text, produces a SHA-256 snapshot hash, extracts literal unverified rule
+quotes and builds a checklist for manual verification. Entries are searchable,
+deduplicated by URL+content hash, and kept as separate versions if text changes.
+
+**Critical:** URL plausibility and copied text do NOT authenticate a real source
+or prove eligibility. Every imported award remains `NEEDS_VERIFICATION`; no
+essay or external form is automatically submitted. There is no live scraping
+from this feature, and the demo agents still operate on fictional fixtures.
+For setup and limitations see [source intake guide](docs/SOURCE_INTAKE.md).
+
 ## 🖥 v0.5 Student Dashboard — local browser preview
 
 **You can now use ScholarOS through an actual browser, not only the terminal.**

@@ -24,6 +24,8 @@
 | Verbatim-evidence outline and review packet with hash-bound consent | Implemented, tested on fictional cases | `workspace.py` |
 | Real provider-approved submit adapters, receipt verification and portal automation | **Not implemented** | Explicitly blocked |
 | Localhost-only student dashboard with login, profile, source directory, workflow, packet review/approval | Implemented and offline-tested | `src/scholaros/webui.py`, `tests/test_webui.py` |
+| Manually imported individual award page text, encrypted versioned snapshots, quote candidates and review checklist | Implemented; offline tests | `source_intake.py`, `test_source_intake.py` |
+| Automatically validated individual-award eligibility from official live sources | Not implemented | Must be manually adjudicated |
 | Hosted SaaS authentication / multi-user dashboard | Not implemented | N/A |
 
 **No legal, immigration or financial-aid advice.** Awards never guaranteed. Student data requires explicit consent, an encrypted vault key and additional security controls before real use; no production SaaS readiness claimed.
@@ -71,3 +73,9 @@ CI enforces Ruff lint/format, mypy --strict on src/, Python 3.11/3.12, pytest >=
 - Student onboarding, encrypted profile persistence, searchable institutional **unverified source links**, demo agent workflow and manual packet approval screens are implemented. The award catalog used by default is **fictional**.
 - No actual scholarship applicant matching from a reviewed real catalog, no hosted auth, no scholarship portal login or submission. Always `NOT_SUBMITTED`.
 - [CI feature-branch verification](https://github.com/nguyenbui1105/scholaros/actions/runs/45000116305): **183 tests passed**, **86.24% statement coverage** on Python 3.11; Ruff lint+format, strict mypy, Python 3.11/3.12, dependency audit and Gitleaks passed. Final main branch requires a fresh CI check.
+
+## v0.6 candidate scholarship intake (unreleased)
+- Added browser **My researched awards** to manually paste one individual scholarship URL plus page text. No network request is performed by intake.
+- Text and page hashes are encrypted locally, and new page revisions are not overwritten. Searchable summaries include exact unverified rule quotes and an explicit manual verification queue.
+- Institution-like HTTPS URL checks are a plausibility screen, not provider authentication. Browser content is escaped and CSRF/authentication checks remain required.
+- Imported pages **never** become `ELIGIBLE` or `SUBMITTED` through this feature. Real-provider eligibility matching, automated collection and authorized form submission are still incomplete.

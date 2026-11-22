@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased] — v0.6 individual scholarship source intake
+
+- Added manual individual-award source URL/text intake to the authenticated localhost UI.
+- Store imported source revisions encrypted under `.scholaros/source_awards.enc` with SHA-256 and timestamps.
+- Extract tentative verbatim rule candidates with negation/exception screening; create human review checklist.
+- Deduplicate snapshots by source URL and content digest and expose searchable entries.
+- Explicit `needs_verification` and `NOT_SUBMITTED` statuses for all imported pages. No automatic source authentication, real scholarship eligibility decision, LLM essay generation, or submission.
+- Added browser auth/CSRF, tampering, encrypted persistence, XSS and negation regression tests.
+- Read `docs/SOURCE_INTAKE.md` for use and limitations.
+
+
 ## [Unreleased] — v0.5 local Student Experience MVP
 
 - Added a real localhost-only browser UI using optional FastAPI/Uvicorn dependencies.
