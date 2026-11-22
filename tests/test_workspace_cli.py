@@ -36,7 +36,7 @@ def test_user_can_onboard_and_run_agents_offline(tmp_path: Path) -> None:
     )
     assert created["saved_encrypted"]
     assert profile_path.exists()
-    assert b"F-1" not in profile_path.read_bytes()
+    assert Fernet(env["SCHOLAROS_FERNET_KEY"].encode()).decrypt(\n        profile_path.read_bytes()\n    )
     run = run_cli(
         "autopilot",
         "--vault",
