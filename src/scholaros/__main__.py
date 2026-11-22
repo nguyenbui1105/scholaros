@@ -159,6 +159,7 @@ def main() -> None:
                 raise ValueError("Select an unprivileged TCP port (1024–65535)")
             try:
                 import uvicorn
+
                 from .webui import create_app
             except ImportError as exc:
                 raise RuntimeError('Install ScholarOS with pip install -e ".[web]"') from exc
