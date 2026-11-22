@@ -97,10 +97,8 @@ def main() -> None:
     approval.add_argument("--json", action="store_true")
     web = sub.add_parser("web", help="Open a private localhost-only student dashboard")
     web.add_argument("--port", type=int, default=8765, help="Loopback port (default 8765)")
-    web.add_argument("--catalog", type=Path,
-                     default=Path("examples/agent_demo_catalog.json"))
-    web.add_argument("--sources", type=Path,
-                     default=Path("examples/source_discovery_seeds.json"))
+    web.add_argument("--catalog", type=Path, default=Path("examples/agent_demo_catalog.json"))
+    web.add_argument("--sources", type=Path, default=Path("examples/source_discovery_seeds.json"))
     init = sub.add_parser("init")
     init.add_argument("--json", action="store_true")
     init.add_argument("--db", type=Path, default=Path(".scholaros/scholaros.db"))

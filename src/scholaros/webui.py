@@ -75,22 +75,24 @@ def _html(title: str, contents: str, *, authenticated: bool = True) -> HTMLRespo
         '<nav><a href="/">Dashboard</a><a href="/profile">My profile</a>'
         '<a href="/sources">Scholarship sources</a>'
         '<a href="/applications">Applications</a></nav>'
-        if authenticated else ""
+        if authenticated
+        else ""
     )
     body = (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
-        f'<title>{_text(title)} | ScholarOS</title><style>{_STYLES}</style></head>'
+        f"<title>{_text(title)} | ScholarOS</title><style>{_STYLES}</style></head>"
         '<body><header><div class="shell"><span class="brand">✳ ScholarOS</span>'
         f'{nav}</div></header><main class="shell">{contents}</main>'
-        '<footer>Local research workspace · No automated submissions · '
-        'Not legal or financial-aid advice</footer></body></html>'
+        "<footer>Local research workspace · No automated submissions · "
+        "Not legal or financial-aid advice</footer></body></html>"
     )
     return HTMLResponse(body)
 
 
-def _input(label: str, field: str, value: object = "", *, required: bool = False,
-           kind: str = "text") -> str:
+def _input(
+    label: str, field: str, value: object = "", *, required: bool = False, kind: str = "text"
+) -> str:
     req = " required" if required else ""
     return (
         f'<label for="{field}">{_text(label)}</label>'
@@ -134,9 +136,11 @@ def create_app(
         if origin:
             try:
                 parts = urlsplit(origin)
-                if parts.scheme != "http" or parts.hostname not in {
-                    "localhost", "127.0.0.1", "::1"
-                } or parts.port != request.url.port:
+                if (
+                    parts.scheme != "http"
+                    or parts.hostname not in {"localhost", "127.0.0.1", "::1"}
+                    or parts.port != request.url.port
+                ):
                     return False
             except ValueError:
                 return False
@@ -155,9 +159,7 @@ def create_app(
         return f'<input type="hidden" name="csrf" value="{_text(csrf_value)}">'
 
     @app.middleware("http")
-    async def security_headers(
-        request: Request, call_next: Any
-    ) -> Response:
+    async def security_headers(request: Request, call_next: Any) -> Response:
         response: Response = await call_next(request)
         response.headers["Content-Security-Policy"] = (
             "default-src 'none'; style-src 'unsafe-inline'; "
@@ -174,7 +176,7 @@ def create_app(
             "Unlock",
             '<section class="panel"><h1>Unlock your workspace</h1>'
             '<p class="lead">Enter the access code shown in the terminal. '
-            'All applicant records are stored locally with encryption.</p>'
+            "All applicant records are stored locally with encryption.</p>"
             '<form method="post" action="/unlock">'
             '<label for="access_code">Access code</label>'
             '<input id="access_code" type="password" name="access_code" required>'
@@ -191,8 +193,13 @@ def create_app(
             return HTMLResponse("Access denied", status_code=403)
         response = RedirectResponse("/", status_code=303)
         response.set_cookie(
-            "scholaros_session", session, httponly=True, secure=False,
-            samesite="strict", path="/", max_age=3600,
+            "scholaros_session",
+            session,
+            httponly=True,
+            secure=False,
+            samesite="strict",
+            path="/",
+            max_age=3600,
         )
         return response
 
@@ -206,26 +213,26 @@ def create_app(
         intro = (
             "<h1>Your scholarship workspace</h1>"
             '<p class="lead">Enter verified facts once, explore official source '
-            'candidates, and prepare application packets with a human approval gate.</p>'
+            "candidates, and prepare application packets with a human approval gate.</p>"
             '<div class="warn"><strong>Research alpha:</strong> The built-in award '
-            'catalog is fictional. Official source links are unverified candidates; '
-            'we do not automatically submit applications.</div>'
+            "catalog is fictional. Official source links are unverified candidates; "
+            "we do not automatically submit applications.</div>"
         )
         panels = (
             '<div class="grid"><section class="panel"><span class="pill">Step 1</span>'
-            '<h2>Student profile</h2>'
-            f'<p>{("Encrypted profile saved" if profile_exists else "Not yet configured")}</p>'
+            "<h2>Student profile</h2>"
+            f"<p>{('Encrypted profile saved' if profile_exists else 'Not yet configured')}</p>"
             '<a class="button" href="/profile">Edit profile</a></section>'
             '<section class="panel"><span class="pill">Step 2</span>'
-            '<h2>Scholarship sources</h2><p>Explore institutional starting points '
-            'with explicit source-verification warnings.</p>'
+            "<h2>Scholarship sources</h2><p>Explore institutional starting points "
+            "with explicit source-verification warnings.</p>"
             '<a class="button secondary" href="/sources">Browse sources</a></section>'
             '<section class="panel"><span class="pill">Step 3</span>'
-            '<h2>Agent workflow</h2>'
-            f'<p>{("Review packets below" if packets_exist else "Prepare a review packet")}</p>'
+            "<h2>Agent workflow</h2>"
+            f"<p>{('Review packets below' if packets_exist else 'Prepare a review packet')}</p>"
             '<form method="post" action="/run">'
             f'{csrf()}<button type="submit">Run agents (demo)</button></form>'
-            '</section></div>'
+            "</section></div>"
         )
         return _html("Dashboard", intro + panels)
 
@@ -243,25 +250,29 @@ def create_app(
                 (item.statement for item in profile_data.evidence if item.confirmed_by_student), ""
             )
         fields = (
-            _input("Local ID (not your full name)", "student_id", existing.get("student_id"), required=True)
+            _input(
+                "Local ID (not your full name)",
+                "student_id",
+                existing.get("student_id"),
+                required=True,
+            )
             + _input("School", "school", existing.get("school"))
             + _input("Visa category (e.g. F-1)", "visa_status", existing.get("visa_status"))
             + _input("Academic level", "academic_level", existing.get("academic_level"))
-            + _input("Majors (comma separated)", "majors",
-                     ", ".join(existing.get("majors") or []))
+            + _input("Majors (comma separated)", "majors", ", ".join(existing.get("majors") or []))
             + _input("GPA (0.0–4.0, blank if unknown)", "gpa", existing.get("gpa"), kind="number")
         )
         content = (
             '<section class="panel"><h1>My profile</h1>'
             '<p class="note">Do not enter passport numbers, SSNs, birth dates or financial details.'
-            ' Saved data is encrypted locally; the encryption key stays in your environment.</p>'
+            " Saved data is encrypted locally; the encryption key stays in your environment.</p>"
             '<form method="post" action="/profile">'
-            f'{csrf()}{fields}'
+            f"{csrf()}{fields}"
             '<label for="confirmed_story">A statement you personally confirm as true</label>'
             f'<textarea id="confirmed_story" name="confirmed_story" rows="4">'
-            f'{_text(story)}</textarea>'
+            f"{_text(story)}</textarea>"
             '<label><input name="consent" type="checkbox" value="yes" required>'
-            ' I consent to local encrypted storage of these details.</label>'
+            " I consent to local encrypted storage of these details.</label>"
             '<button type="submit">Save encrypted profile</button></form></section>'
         )
         return _html("My profile", content)
@@ -286,15 +297,23 @@ def create_app(
             )
             story = _field(form, "confirmed_story")
             evidence = (
-                [EvidenceItem(id="local-story-1", student_id=student.student_id,
-                              statement=story, confirmed_by_student=True)]
-                if story else []
+                [
+                    EvidenceItem(
+                        id="local-story-1",
+                        student_id=student.student_id,
+                        statement=story,
+                        confirmed_by_student=True,
+                    )
+                ]
+                if story
+                else []
             )
             bundle = ApplicantBundle(student=student, evidence=evidence)
             save_private(profile_path, bundle.model_dump(mode="json"))
         except (ValueError, RuntimeError):
-            return HTMLResponse("Please check the GPA, profile and encryption settings",
-                                status_code=400)
+            return HTMLResponse(
+                "Please check the GPA, profile and encryption settings", status_code=400
+            )
         return RedirectResponse("/", status_code=303)
 
     @app.get("/sources", response_class=HTMLResponse)
@@ -315,20 +334,25 @@ def create_app(
             if term not in (url + " " + kind).casefold():
                 continue
             parts = urlsplit(url)
-            if (parts.scheme != "https" or not parts.hostname
-                    or parts.username or parts.password or parts.port not in (None, 443)):
+            if (
+                parts.scheme != "https"
+                or not parts.hostname
+                or parts.username
+                or parts.password
+                or parts.port not in (None, 443)
+            ):
                 continue
             cards.append(
                 '<article class="panel"><span class="pill">Unverified source</span>'
                 f'<h2>{_text(parts.hostname)}</h2><p class="note">{_text(kind)}'
-                f' · {_text(status)}</p><p>{_text(parts.path)}</p>'
+                f" · {_text(status)}</p><p>{_text(parts.path)}</p>"
                 f'<a href="{_text(url)}" target="_blank" rel="noopener noreferrer">'
-                'Open official source website</a></article>'
+                "Open official source website</a></article>"
             )
         intro = (
             "<h1>Explore scholarship sources</h1>"
             '<p class="lead">Browse publicly listed institutional sites. They are '
-            'NOT verified individual awards and are not matched to your F-1 eligibility.</p>'
+            "NOT verified individual awards and are not matched to your F-1 eligibility.</p>"
             '<form method="get" action="/sources">'
             f'<label for="q">Search source or institution</label><input id="q" '
             f'name="q" value="{_text(term)}" placeholder="e.g. pcc.edu">'
@@ -346,8 +370,9 @@ def create_app(
         try:
             execute(profile_path, catalog_path, packets_path, today=date.today())
         except (OSError, ValueError, RuntimeError):
-            return HTMLResponse("Cannot prepare packets: verify local configuration",
-                                status_code=400)
+            return HTMLResponse(
+                "Cannot prepare packets: verify local configuration", status_code=400
+            )
         return RedirectResponse("/applications", status_code=303)
 
     @app.get("/applications", response_class=HTMLResponse)
@@ -357,8 +382,9 @@ def create_app(
             return denied
         if not packets_path.is_file():
             return _html(
-                "Applications", '<h1>Application packets</h1><section class="panel">'
-                'No packets yet. Create a profile, then run the demo workflow.</section>',
+                "Applications",
+                '<h1>Application packets</h1><section class="panel">'
+                "No packets yet. Create a profile, then run the demo workflow.</section>",
             )
         state = load_private(packets_path)
         cards: list[str] = []
@@ -368,41 +394,39 @@ def create_app(
                 f"<li>{_text(item.get('field'))}: {_text(item.get('code'))}</li>"
                 for item in packet.get("reasons", [])
             )
-            outline = "".join(
-                f"<li>{_text(line)}</li>" for line in packet.get("outline", [])
-            )
+            outline = "".join(f"<li>{_text(line)}</li>" for line in packet.get("outline", []))
             checks = "".join(
                 f"<li>{_text(line)}</li>" for line in packet.get("required_checks", [])
             )
             content = (
                 '<article class="panel"><span class="pill">'
-                f'{_text(eligibility)}</span><h2>{_text(packet.get("title"))}</h2>'
+                f"{_text(eligibility)}</span><h2>{_text(packet.get('title'))}</h2>"
                 '<p class="note">Status: '
-                f'{_text(packet.get("submission_status"))} · '
-                f'Approved: {_text(packet.get("approved"))}</p>'
-                '<details><summary>Evidence and reason codes</summary>'
-                f'<ul>{reasons}</ul></details>'
-                '<details><summary>Draft outline (student must review)</summary>'
-                f'<ul>{outline}</ul></details>'
-                '<details><summary>Before applying</summary>'
-                f'<ul>{checks}</ul></details>'
+                f"{_text(packet.get('submission_status'))} · "
+                f"Approved: {_text(packet.get('approved'))}</p>"
+                "<details><summary>Evidence and reason codes</summary>"
+                f"<ul>{reasons}</ul></details>"
+                "<details><summary>Draft outline (student must review)</summary>"
+                f"<ul>{outline}</ul></details>"
+                "<details><summary>Before applying</summary>"
+                f"<ul>{checks}</ul></details>"
                 '<p class="note">A decision here is based on the local catalog. '
-                'It is not proof of actual provider eligibility or submission.</p>'
+                "It is not proof of actual provider eligibility or submission.</p>"
                 '<form method="post" action="/approve">'
-                f'{csrf()}'
+                f"{csrf()}"
                 f'<input type="hidden" name="packet_id" value="{_text(packet.get("id"))}">'
                 f'<input type="hidden" name="packet_hash" '
                 f'value="{_text(packet.get("packet_hash"))}">'
                 '<label><input type="checkbox" name="student_confirmed" value="yes" required>'
-                ' I reviewed this exact packet for manual submission.</label>'
+                " I reviewed this exact packet for manual submission.</label>"
                 '<button type="submit">Approve packet (does not submit)</button>'
-                '</form></article>'
+                "</form></article>"
             )
             cards.append(content)
         prefix = (
-            '<h1>Application packets</h1>'
+            "<h1>Application packets</h1>"
             '<div class="warn"><strong>NOT SUBMITTED.</strong> This local demo uses '
-            'a fictional catalog. Approval never sends any application to a provider.</div>'
+            "a fictional catalog. Approval never sends any application to a provider.</div>"
         )
         return _html("Applications", prefix + "".join(cards))
 
@@ -419,8 +443,9 @@ def create_app(
                 student_confirmed=_field(form, "student_confirmed") == "yes",
             )
         except (OSError, ValueError, RuntimeError, PermissionError):
-            return HTMLResponse("Approval rejected: review the latest exact packet",
-                                status_code=400)
+            return HTMLResponse(
+                "Approval rejected: review the latest exact packet", status_code=400
+            )
         return RedirectResponse("/applications", status_code=303)
 
     return app

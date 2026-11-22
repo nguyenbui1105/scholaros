@@ -35,18 +35,24 @@ def unlock(client: TestClient, secret: str) -> None:
 
 def csrf(client: TestClient) -> str:
     import re
+
     html = client.get("/").text
     found = re.search(r'name="csrf" value="([^"]+)"', html)
     assert found is not None
     return found.group(1)
 
 
-def test_anonymous_and_wrong_code_never_reveal_profile(session: tuple[TestClient, str, Path]) -> None:
+def test_anonymous_and_wrong_code_never_reveal_profile(
+    session: tuple[TestClient, str, Path],
+) -> None:
     client, secret, _ = session
     assert client.get("/").status_code == 303
     assert "Access code" in client.get("/unlock").text
     assert client.post("/unlock", data={"access_code": "wrong"}).status_code == 403
-    assert "scholarship" not in client.get("/unlock").text.lower() or secret not in client.get("/unlock").text
+    assert (
+        "scholarship" not in client.get("/unlock").text.lower()
+        or secret not in client.get("/unlock").text
+    )
 
 
 def test_requires_csrf_and_rejects_cross_site_origin(session: tuple[TestClient, str, Path]) -> None:
@@ -54,9 +60,12 @@ def test_requires_csrf_and_rejects_cross_site_origin(session: tuple[TestClient, 
     unlock(client, secret)
     assert client.post("/run").status_code == 403
     token = csrf(client)
-    assert client.post(
-        "/run", data={"csrf": token}, headers={"Origin": "https://attacker.example"}
-    ).status_code == 403
+    assert (
+        client.post(
+            "/run", data={"csrf": token}, headers={"Origin": "https://attacker.example"}
+        ).status_code
+        == 403
+    )
 
 
 def test_profile_run_review_and_exact_approval_offline(
@@ -94,8 +103,12 @@ def test_profile_run_review_and_exact_approval_offline(
     # Not a provider-side action: this only approves the packet for manual use.
     approved = client.post(
         "/approve",
-        data={"csrf": token, "packet_id": packet["id"],
-              "packet_hash": packet["packet_hash"], "student_confirmed": "yes"},
+        data={
+            "csrf": token,
+            "packet_id": packet["id"],
+            "packet_hash": packet["packet_hash"],
+            "student_confirmed": "yes",
+        },
         follow_redirects=False,
     )
     assert approved.status_code == 303
@@ -107,9 +120,14 @@ def test_no_consent_no_encrypted_profile(session: tuple[TestClient, str, Path]) 
     client, secret, packets_path = session
     unlock(client, secret)
     token = csrf(client)
-    response = client.post("/profile", data={
-        "csrf": token, "student_id": "case", "gpa": "3.5",
-    })
+    response = client.post(
+        "/profile",
+        data={
+            "csrf": token,
+            "student_id": "case",
+            "gpa": "3.5",
+        },
+    )
     assert response.status_code == 400
     assert not (packets_path.parent / "profile.enc").exists()
 
@@ -119,10 +137,16 @@ def test_escaped_markup_and_unverified_source_labels(session: tuple[TestClient, 
     unlock(client, secret)
     token = csrf(client)
     malicious = '<script>alert("XSS")</script>'
-    response = client.post("/profile", data={
-        "csrf": token, "student_id": "student-01", "school": malicious,
-        "consent": "yes",
-    }, follow_redirects=False)
+    response = client.post(
+        "/profile",
+        data={
+            "csrf": token,
+            "student_id": "student-01",
+            "school": malicious,
+            "consent": "yes",
+        },
+        follow_redirects=False,
+    )
     assert response.status_code == 303
     homepage = client.get("/")
     assert malicious not in homepage.text
@@ -141,7 +165,8 @@ def test_host_spoofing_is_rejected(session: tuple[TestClient, str, Path]) -> Non
 
 
 def test_web_requires_encryption_key_before_start(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.delenv("SCHOLAROS_FERNET_KEY", raising=False)
     with pytest.raises(RuntimeError, match="SCHOLAROS_FERNET_KEY"):
