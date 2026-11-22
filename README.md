@@ -38,6 +38,31 @@
 
 See [precise status](docs/STATUS.md). A real optional OpenAI SDK adapter exists but has **no live integration test**.
 
+## 🖥 v0.5 Student Dashboard — local browser preview
+
+**You can now use ScholarOS through an actual browser, not only the terminal.**
+It runs locally, stores your profile and packets encrypted, and allows you to
+review the agent-created packet before approving it for **manual submission**.
+
+```bash
+python -m pip install -e ".[web]"
+# Generate and securely keep a Fernet key; NEVER commit or share it.
+export SCHOLAROS_FERNET_KEY="$(python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')"
+scholaros web
+```
+
+Open **http://127.0.0.1:8765/unlock** and enter the private access code printed in your
+terminal. Windows PowerShell instructions and security limitations are in
+[the v0.5 web dashboard guide](docs/WEB_UI.md).
+
+The interface supports encrypted student onboarding, a searchable directory of
+institutional scholarship-source **candidates**, running deterministic
+agent roles using the **fictional demo award catalog**, and reviewing/approving
+an application packet. This is **not yet a real F-1 scholarship finder, a real
+scholarship application portal or an autonomous submitter**. The UI does not
+request passport numbers or financial documents. No hosted multi-user access,
+real-world eligibility guarantee, or external submission receipts are provided.
+
 ## 🚀 Quickstart
 
 Requires Python 3.11+.

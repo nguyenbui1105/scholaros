@@ -23,7 +23,8 @@
 | Local encrypted student onboarding and deterministic agent-role coordinator | Implemented, tested | `workspace.py`, `workspace_cli.py`, `tests/test_workspace*.py` |
 | Verbatim-evidence outline and review packet with hash-bound consent | Implemented, tested on fictional cases | `workspace.py` |
 | Real provider-approved submit adapters, receipt verification and portal automation | **Not implemented** | Explicitly blocked |
-| Web dashboard / SaaS authentication | Not implemented | N/A |
+| Localhost-only student dashboard with login, profile, source directory, workflow, packet review/approval | Implemented; CI verification pending | `src/scholaros/webui.py`, `tests/test_webui.py` |
+| Hosted SaaS authentication / multi-user dashboard | Not implemented | N/A |
 
 **No legal, immigration or financial-aid advice.** Awards never guaranteed. Student data requires explicit consent, an encrypted vault key and additional security controls before real use; no production SaaS readiness claimed.
 
@@ -63,3 +64,10 @@ CI enforces Ruff lint/format, mypy --strict on src/, Python 3.11/3.12, pytest >=
 - Live agent deployment: seven deterministic roles are orchestrated in-process, **not seven long-running LLM agents**. Real autonomous scholarship research and submission remain unimplemented.
 - Encrypted onboarding, local reviewed-case matching, evidence-only outline, prefilled basic form fields, packet hash and explicit approval are available. CI fixture catalog is fictional; do not treat matches as real scholarship eligibility.
 - The CLI has no authorized real-provider submission integration, and **no portal is contacted, no submission receipt is issued**.
+
+## v0.5 student-facing local UI (unreleased preview)
+- FastAPI localhost-only application behind `scholaros web`; optional `.[web]` dependencies.
+- Browser login uses ephemeral access code, HttpOnly SameSite=Strict cookie, trusted Host restrictions and CSRF/Origin checks. Browser-input HTML is escaped; no CDN or external JS is loaded. Not independently security-audited.
+- Student onboarding, encrypted profile persistence, searchable institutional **unverified source links**, demo agent workflow and manual packet approval screens are implemented. The award catalog used by default is **fictional**.
+- No actual scholarship applicant matching from a reviewed real catalog, no hosted auth, no scholarship portal login or submission. Always `NOT_SUBMITTED`.
+- Automated UI tests are included; see final CI for complete pass and coverage metrics.

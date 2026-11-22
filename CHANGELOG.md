@@ -1,5 +1,20 @@
 # Changelog
 
+## [Unreleased] — v0.5 local Student Experience MVP
+
+- Added a real localhost-only browser UI using optional FastAPI/Uvicorn dependencies.
+- Added ephemeral terminal-issued access code, SameSite=Strict HttpOnly session,
+  Host and Origin/CSRF checks, CSP and HTML escaping.
+- Added encrypted student profile entry, searchable institutional **unverified**
+  source directory, deterministic demo agent workflow, application packet
+  explanation and exact-hash student approval. Approval does **not** submit.
+- Added offline TestClient regression tests for login guards, cross-origin
+  requests, consent, XSS, PII encryption and non-submission.
+- Real award catalog, independently verified applicant matches, hosted SaaS
+  authentication and authorized provider submission are **not implemented**.
+- Documentation: `docs/WEB_UI.md`, `docs/V05_PLAN.md`.
+
+
 ## [Unreleased] — encrypted assisted-application workspace
 
 - Added interactive student onboarding to a Fernet-encrypted local workspace; no plaintext applicant storage or secrets in git.

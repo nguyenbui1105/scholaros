@@ -42,6 +42,23 @@
 
 **No unattended form submission or CAPTCHA circumvention is planned.** After reviewing a packet, the applicant must explicitly authorize its exact destination and final version.
 
+## v0.5 — local Student Experience (preview)
+
+- [x] Localhost browser UI with authenticated access-code session
+- [x] Encrypted student onboarding and saved profile editing
+- [x] Searchable directory of unverified institutional scholarship sources
+- [x] Deterministic agent demonstration and reviewable packets
+- [x] Explicit SHA-256-bound approval, no external submission
+- [x] Local browser security controls and offline tests
+- [ ] Current, independently verified per-award catalog relevant to F-1 students
+- [ ] Student-friendly real scholarship eligibility search, including provider-local deadlines
+- [ ] Full essay editing and independent human factual review
+- [ ] Officially permitted provider submission integration and receipt verification
+- [ ] Authenticated hosted application, secure backup/key rotation and security audit
+
+See [web UI guide](WEB_UI.md) and [implementation plan](V05_PLAN.md).
+**Local browser does not mean production SaaS readiness.**
+
 ## Next — grounded public-source beta
 - [ ] Independent real-source authority/permission validation and repeatable robots compliance
 - [ ] Manually adjudicated eligibility cases from multiple providers (F-1, citizenship, enrollment conditions)

@@ -8,7 +8,8 @@
 - **Application operations:** this beta creates packets and checklists only. It does not log in, submit, bypass CAPTCHA, or perform anti-bot workarounds.
 - **Privacy:** no real student PII in git or fixtures. The SQLite vault refuses plaintext unless local-only override explicitly enabled; encryption lacks key rotation, secure backup erasure, login and tenant isolation.
 - **Scraping:** live fetch is disabled by default, checks robots and has conservative rate limits, but is not a license to scrape any provider.
-- **Metrics:** a synthetic 36-pair benchmark is not a real-world scholarship award prediction. No statistical acceptance rate is offered.
+- **Local web UI:** optional browser service binds only 127.0.0.1 and requires a private terminal-issued access code plus CSRF/Origin validation; no reverse proxy or public tunnel is supported. Stored student data remains Fernet-encrypted. The UI is not independently penetration-tested or suitable for multi-user hosting.
+- **Metrics:** a synthetic 83-pair benchmark is not a real-world scholarship award prediction. No statistical acceptance rate is offered.
 - **Legal disclaimer:** not legal, immigration, or financial-aid advice. Scholarships and awards are never guaranteed.
 
 See [threat model](THREAT_MODEL.md) and [evaluation](EVALUATION.md).
