@@ -31,3 +31,5 @@ jobs:
             git commit -m "style(v0.7): Ruff formatting"
             git push origin HEAD:feat/v07-cited-profile-triage
           fi
+
+# Re-run after syntax repair
