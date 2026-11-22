@@ -24,7 +24,8 @@ from .workspace import load_private, save_private
 Screen = Literal["potential_match", "potential_mismatch", "needs_verification"]
 _MINIMUM_GPA = re.compile(
     r"\b(?:minimum\s+gpa|gpa\s+(?:of\s+)?(?:at\s+least|minimum\s+of))"
-    r"\s*[:=]?\s*(\d(?:\.\d{1,2})?)\b", re.IGNORECASE
+    r"\s*[:=]?\s*(\d(?:\.\d{1,2})?)\b",
+    re.IGNORECASE,
 )
 _DEADLINE = re.compile(r"\bdeadline\s*:\s*(\d{4}-\d{2}-\d{2})\b", re.IGNORECASE)
 _VISA = re.compile(r"(?<!\w)f[\s-]*1(?!\w)", re.IGNORECASE)
@@ -69,7 +70,8 @@ def _quote_context_verified(text: str, quote: str | None, field: str) -> str:
         raise ValueError(f"Missing or nonverbatim {field} quote")
     if _has_negation(context) or re.search(
         r"\b(?:not\s+open\s+to|not\s+available\s+to|does\s+not\s+accept)\b",
-        context, re.IGNORECASE,
+        context,
+        re.IGNORECASE,
     ):
         raise ValueError(f"Ambiguous or negative {field} rule near quoted text")
     return context
@@ -148,8 +150,11 @@ def compare_profile(
             )
         if review.deadline is not None:
             checks["deadline"] = (
-                "potential_mismatch" if today > review.deadline else
-                "preliminary_match" if review.timezone_verified else "needs_verification"
+                "potential_mismatch"
+                if today > review.deadline
+                else "preliminary_match"
+                if review.timezone_verified
+                else "needs_verification"
             )
         if not review.all_other_requirements_verified:
             pending.append("Other award requirements were not confirmed by the reviewer")
@@ -158,8 +163,7 @@ def compare_profile(
     elif review is not None and all(value == "preliminary_match" for value in checks.values()):
         screening = "potential_match"
     elif review is not None and (
-        checks["visa_status"] == "preliminary_match"
-        and checks["gpa"] == "preliminary_match"
+        checks["visa_status"] == "preliminary_match" and checks["gpa"] == "preliminary_match"
     ):
         screening = "potential_match"
     else:
@@ -193,7 +197,8 @@ def save_review(path: Path, review: ReviewedConstraint) -> None:
     review = ReviewedConstraint.model_validate(review.model_dump())
     old = load_reviews(path)
     existing = [
-        item for item in old
+        item
+        for item in old
         if not (item.award_id == review.award_id and item.content_hash == review.content_hash)
     ]
     existing.append(review)

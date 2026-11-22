@@ -441,7 +441,6 @@ def create_app(
             )
         return RedirectResponse("/my-sources", status_code=303)
 
-
     @app.get("/triage", response_class=HTMLResponse)
     async def triage_view(request: Request) -> Response:
         denied = gate(request)
@@ -451,7 +450,7 @@ def create_app(
             return _html(
                 "Preliminary matching",
                 '<h1>Preliminary matching</h1><div class="warn">'
-                'Create your encrypted profile first to compare your facts with cited rules.'
+                "Create your encrypted profile first to compare your facts with cited rules."
                 '</div><a href="/profile">Edit profile</a>',
             )
         student = ApplicantBundle.model_validate(load_private(profile_path)).student
@@ -471,12 +470,12 @@ def create_app(
                 comparisons = "<li>Stored review must be checked against this source version</li>"
             sections.append(
                 '<section class="panel"><span class="pill">NEEDS_VERIFICATION</span>'
-                f'<h2>{_text(case.title)}</h2>'
-                f'<p><strong>Preliminary screening:</strong> {status}</p>'
+                f"<h2>{_text(case.title)}</h2>"
+                f"<p><strong>Preliminary screening:</strong> {status}</p>"
                 '<p class="note">Student-entered facts + self-reviewed quotes; '
-                'not independent scholarship eligibility confirmation. NOT_SUBMITTED.</p>'
-                f'<ul>{comparisons}</ul>'
-                '<details><summary>Review exact eligibility statements</summary>'
+                "not independent scholarship eligibility confirmation. NOT_SUBMITTED.</p>"
+                f"<ul>{comparisons}</ul>"
+                "<details><summary>Review exact eligibility statements</summary>"
                 '<form method="post" action="/triage/review">'
                 + csrf()
                 + f'<input type="hidden" name="award_id" value="{_text(case.id)}">'
@@ -488,22 +487,25 @@ def create_app(
                 + _input("Deadline YYYY-MM-DD", "deadline")
                 + _input("Exact deadline quote", "deadline_quote")
                 + '<label><input type="checkbox" name="timezone_verified" value="yes">'
-                ' I independently checked the provider-local deadline cutoff</label>'
+                " I independently checked the provider-local deadline cutoff</label>"
                 '<label><input type="checkbox" name="other_verified" value="yes">'
-                ' I reviewed other eligibility requirements</label>'
+                " I reviewed other eligibility requirements</label>"
                 '<label><input type="checkbox" name="acknowledged" value="yes" required>'
-                ' I checked the exact quotes on this source version</label>'
+                " I checked the exact quotes on this source version</label>"
                 '<button type="submit">Save local rule review</button>'
-                '</form></details></section>'
+                "</form></details></section>"
             )
         return _html(
             "Preliminary matching",
-            '<h1>Preliminary matching</h1>'
+            "<h1>Preliminary matching</h1>"
             '<div class="warn">Only a tentative shortlist. All imported awards remain '
-            'NEEDS_VERIFICATION even after local review. No auto-submit.</div>'
-            + ("".join(sections) if sections else
-               '<section class="panel">Add a scholarship page in '
-               '<a href="/my-sources">My researched awards</a> first.</section>'),
+            "NEEDS_VERIFICATION even after local review. No auto-submit.</div>"
+            + (
+                "".join(sections)
+                if sections
+                else '<section class="panel">Add a scholarship page in '
+                '<a href="/my-sources">My researched awards</a> first.</section>'
+            ),
         )
 
     @app.post("/triage/review")
@@ -514,8 +516,8 @@ def create_app(
         if not profile_path.is_file():
             return HTMLResponse("Create a student profile first", status_code=400)
         case = next(
-            (item for item in load_awards(research_store)
-             if item.id == _field(form, "award_id")), None
+            (item for item in load_awards(research_store) if item.id == _field(form, "award_id")),
+            None,
         )
         if case is None:
             return HTMLResponse("Unknown source version", status_code=404)
@@ -526,15 +528,14 @@ def create_app(
                 content_hash=case.content_hash,
                 reviewer_id=_field(form, "reviewer_id"),
                 acknowledged_manual_review=_field(form, "acknowledged") == "yes",
-                min_gpa=(
-                    float(_field(form, "min_gpa")) if _field(form, "min_gpa") else None
-                ),
+                min_gpa=(float(_field(form, "min_gpa")) if _field(form, "min_gpa") else None),
                 gpa_quote=_field(form, "gpa_quote") or None,
                 accepted_visa=_field(form, "accepted_visa") or None,
                 visa_quote=_field(form, "visa_quote") or None,
                 deadline=(
                     date.fromisoformat(_field(form, "deadline"))
-                    if _field(form, "deadline") else None
+                    if _field(form, "deadline")
+                    else None
                 ),
                 deadline_quote=_field(form, "deadline_quote") or None,
                 timezone_verified=_field(form, "timezone_verified") == "yes",

@@ -45,13 +45,19 @@ def csrf(client: TestClient) -> str:
 
 
 def insert_source(client: TestClient) -> None:
-    assert client.post(
-        "/my-sources", follow_redirects=False,
-        data={
-            "csrf": csrf(client), "title": "2027 Demo Award",
-            "source_url": URL, "source_text": SOURCE,
-        },
-    ).status_code == 303
+    assert (
+        client.post(
+            "/my-sources",
+            follow_redirects=False,
+            data={
+                "csrf": csrf(client),
+                "title": "2027 Demo Award",
+                "source_url": URL,
+                "source_text": SOURCE,
+            },
+        ).status_code
+        == 303
+    )
 
 
 def test_review_and_preliminary_match_never_claim_eligible(
@@ -67,11 +73,16 @@ def test_review_and_preliminary_match_never_claim_eligible(
         "/triage/review",
         follow_redirects=False,
         data={
-            "csrf": csrf(client), "award_id": award.id,
-            "reviewer_id": "applicant-local", "acknowledged": "yes",
-            "min_gpa": "3.5", "gpa_quote": "Minimum GPA 3.5",
-            "accepted_visa": "F-1", "visa_quote": "F-1 international students",
-            "deadline": "2027-05-01", "deadline_quote": "Deadline: 2027-05-01",
+            "csrf": csrf(client),
+            "award_id": award.id,
+            "reviewer_id": "applicant-local",
+            "acknowledged": "yes",
+            "min_gpa": "3.5",
+            "gpa_quote": "Minimum GPA 3.5",
+            "accepted_visa": "F-1",
+            "visa_quote": "F-1 international students",
+            "deadline": "2027-05-01",
+            "deadline_quote": "Deadline: 2027-05-01",
         },
     )
     assert action.status_code == 303
@@ -92,15 +103,20 @@ def test_missing_quote_and_csrf_do_not_write_review(
 
     award = load_awards(path.parent / "sources.enc")[0]
     data = {
-        "award_id": award.id, "reviewer_id": "local", "acknowledged": "yes",
-        "accepted_visa": "F-1", "visa_quote": "Invented quote",
+        "award_id": award.id,
+        "reviewer_id": "local",
+        "acknowledged": "yes",
+        "accepted_visa": "F-1",
+        "visa_quote": "Invented quote",
     }
     assert client.post("/triage/review", data=data).status_code == 403
-    assert client.post(
-        "/triage/review", data={**data, "csrf": csrf(client)}
-    ).status_code == 400
-    assert client.post(
-        "/triage/review", data={**data, "csrf": csrf(client)},
-        headers={"Origin": "https://attacker.example"},
-    ).status_code == 403
+    assert client.post("/triage/review", data={**data, "csrf": csrf(client)}).status_code == 400
+    assert (
+        client.post(
+            "/triage/review",
+            data={**data, "csrf": csrf(client)},
+            headers={"Origin": "https://attacker.example"},
+        ).status_code
+        == 403
+    )
     assert load_reviews(path) == []
