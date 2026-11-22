@@ -461,18 +461,16 @@ def create_app(
         state = load_private(packets_path) if packets_path.is_file() else {"applications": []}
         cards: list[str] = []
         for award in researched:
-            checks = "".join(
-                "<li>" + _text(item) + "</li>" for item in award["review_queue"]
-            )
+            checks = "".join("<li>" + _text(item) + "</li>" for item in award["review_queue"])
             cards.append(
                 '<article class="panel"><span class="pill">NEEDS_VERIFICATION</span>'
-                f'<h2>{_text(award["title"])}</h2>'
+                f"<h2>{_text(award['title'])}</h2>"
                 '<p class="note">Imported actual-page research, NOT_SUBMITTED. '
-                'No eligibility verification or application packet yet.</p>'
-                '<details><summary>Required human checks</summary>'
-                f'<ul>{checks}</ul></details>'
+                "No eligibility verification or application packet yet.</p>"
+                "<details><summary>Required human checks</summary>"
+                f"<ul>{checks}</ul></details>"
                 '<a href="/my-sources">Review original source and evidence</a>'
-                '</article>'
+                "</article>"
             )
         for packet in state.get("applications", []):
             eligibility = str(packet.get("eligibility", "needs_verification"))
@@ -517,7 +515,7 @@ def create_app(
         if not cards:
             cards.append(
                 '<section class="panel">No applications or imported awards yet. '
-                'Add a real award in My researched awards or try the fictional demo.</section>'
+                "Add a real award in My researched awards or try the fictional demo.</section>"
             )
         return _html("Applications", prefix + "".join(cards))
 
