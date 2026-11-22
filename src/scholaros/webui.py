@@ -22,7 +22,9 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.datastructures import FormData
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
+from .profile_triage import ReviewedConstraint, compare_profile, load_reviews, save_review
 from .records import EvidenceItem, StudentProfile
+from .source_intake import load_awards
 from .source_intake import import_award, summarize_awards
 from .workspace import ApplicantBundle, load_private, save_private
 from .workspace_cli import approve, execute
@@ -76,6 +78,7 @@ def _html(title: str, contents: str, *, authenticated: bool = True) -> HTMLRespo
         '<nav><a href="/">Dashboard</a><a href="/profile">My profile</a>'
         '<a href="/sources">Scholarship sources</a>'
         '<a href="/my-sources">My researched awards</a>'
+        '<a href="/triage">Preliminary matching</a>'
         '<a href="/applications">Applications</a></nav>'
         if authenticated
         else ""
@@ -112,11 +115,13 @@ def create_app(
     catalog_path: Path,
     sources_path: Path,
     imported_sources_path: Path | None = None,
+    reviews_path: Path | None = None,
 ) -> FastAPI:
     """Create one local user instance. This is NOT a public multi-user service."""
     if not os.environ.get("SCHOLAROS_FERNET_KEY"):
         raise RuntimeError("SCHOLAROS_FERNET_KEY must be configured before web startup")
     research_store = imported_sources_path or profile_path.parent / "source_awards.enc"
+    review_store = reviews_path or profile_path.parent / "source_reviews.enc"
     if len(access_code) < 8:
         raise ValueError("Local access code is too short")
     app = FastAPI(
@@ -436,6 +441,115 @@ def create_app(
                 status_code=400,
             )
         return RedirectResponse("/my-sources", status_code=303)
+
+
+    @app.get("/triage", response_class=HTMLResponse)
+    async def triage_view(request: Request) -> Response:
+        denied = gate(request)
+        if denied:
+            return denied
+        if not profile_path.is_file():
+            return _html(
+                "Preliminary matching",
+                '<h1>Preliminary matching</h1><div class="warn">'
+                'Create your encrypted profile first to compare your facts with cited rules.'
+                '</div><a href="/profile">Edit profile</a>',
+            )
+        student = ApplicantBundle.model_validate(load_private(profile_path)).student
+        reviews = {item.award_id: item for item in load_reviews(review_store)}
+        sections: list[str] = []
+        for case in load_awards(research_store):
+            previous = reviews.get(case.id)
+            try:
+                screen = compare_profile(student, case, previous, today=date.today())
+                status = _text(screen["screening"])
+                comparisons = "".join(
+                    f"<li>{_text(key)}: {_text(value)}</li>"
+                    for key, value in screen["checks"].items()
+                )
+            except ValueError:
+                status = "needs_verification — stale or invalid review"
+                comparisons = "<li>Stored review must be checked against this source version</li>"
+            sections.append(
+                '<section class="panel"><span class="pill">NEEDS_VERIFICATION</span>'
+                f'<h2>{_text(case.title)}</h2>'
+                f'<p><strong>Preliminary screening:</strong> {status}</p>'
+                '<p class="note">Student-entered facts + self-reviewed quotes; '
+                'not independent scholarship eligibility confirmation. NOT_SUBMITTED.</p>'
+                f'<ul>{comparisons}</ul>'
+                '<details><summary>Review exact eligibility statements</summary>'
+                '<form method="post" action="/triage/review">'
+                + csrf()
+                + f'<input type="hidden" name="award_id" value="{_text(case.id)}">'
+                + _input("Your reviewer label", "reviewer_id", required=True)
+                + _input("Minimum GPA (0–4)", "min_gpa")
+                + _input("Exact quote for minimum GPA", "gpa_quote")
+                + _input("Accepted visa (only F-1 supported)", "accepted_visa")
+                + _input("Exact positive visa quote", "visa_quote")
+                + _input("Deadline YYYY-MM-DD", "deadline")
+                + _input("Exact deadline quote", "deadline_quote")
+                + '<label><input type="checkbox" name="timezone_verified" value="yes">'
+                ' I independently checked the provider-local deadline cutoff</label>'
+                '<label><input type="checkbox" name="other_verified" value="yes">'
+                ' I reviewed other eligibility requirements</label>'
+                '<label><input type="checkbox" name="acknowledged" value="yes" required>'
+                ' I checked the exact quotes on this source version</label>'
+                '<button type="submit">Save local rule review</button>'
+                '</form></details></section>'
+            )
+        return _html(
+            "Preliminary matching",
+            '<h1>Preliminary matching</h1>'
+            '<div class="warn">Only a tentative shortlist. All imported awards remain '
+            'NEEDS_VERIFICATION even after local review. No auto-submit.</div>'
+            + ("".join(sections) if sections else
+               '<section class="panel">Add a scholarship page in '
+               '<a href="/my-sources">My researched awards</a> first.</section>'),
+        )
+
+    @app.post("/triage/review")
+    async def triage_save_review(request: Request) -> Response:
+        form = await request.form()
+        if not safe_post(request, form):
+            return HTMLResponse("Forbidden", status_code=403)
+        if not profile_path.is_file():
+            return HTMLResponse("Create a student profile first", status_code=400)
+        case = next(
+            (item for item in load_awards(research_store)
+             if item.id == _field(form, "award_id")), None
+        )
+        if case is None:
+            return HTMLResponse("Unknown source version", status_code=404)
+        try:
+            rule = ReviewedConstraint(
+                award_id=case.id,
+                source_url=case.source_url,
+                content_hash=case.content_hash,
+                reviewer_id=_field(form, "reviewer_id"),
+                acknowledged_manual_review=_field(form, "acknowledged") == "yes",
+                min_gpa=(
+                    float(_field(form, "min_gpa")) if _field(form, "min_gpa") else None
+                ),
+                gpa_quote=_field(form, "gpa_quote") or None,
+                accepted_visa=_field(form, "accepted_visa") or None,
+                visa_quote=_field(form, "visa_quote") or None,
+                deadline=(
+                    date.fromisoformat(_field(form, "deadline"))
+                    if _field(form, "deadline") else None
+                ),
+                deadline_quote=_field(form, "deadline_quote") or None,
+                timezone_verified=_field(form, "timezone_verified") == "yes",
+                all_other_requirements_verified=_field(form, "other_verified") == "yes",
+            )
+            student = ApplicantBundle.model_validate(load_private(profile_path)).student
+            compare_profile(student, case, rule, today=date.today())
+            save_review(review_store, rule)
+        except (ValueError, RuntimeError, OSError):
+            return HTMLResponse(
+                "Review rejected. Check the exact quotes, source and student details.",
+                status_code=400,
+            )
+        return RedirectResponse("/triage", status_code=303)
 
     @app.post("/run")
     async def run_agents(request: Request) -> Response:
