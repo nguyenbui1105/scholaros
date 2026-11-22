@@ -23,7 +23,7 @@
 | Local encrypted student onboarding and deterministic agent-role coordinator | Implemented, tested | `workspace.py`, `workspace_cli.py`, `tests/test_workspace*.py` |
 | Verbatim-evidence outline and review packet with hash-bound consent | Implemented, tested on fictional cases | `workspace.py` |
 | Real provider-approved submit adapters, receipt verification and portal automation | **Not implemented** | Explicitly blocked |
-| Localhost-only student dashboard with login, profile, source directory, workflow, packet review/approval | Implemented; CI verification pending | `src/scholaros/webui.py`, `tests/test_webui.py` |
+| Localhost-only student dashboard with login, profile, source directory, workflow, packet review/approval | Implemented and offline-tested | `src/scholaros/webui.py`, `tests/test_webui.py` |
 | Hosted SaaS authentication / multi-user dashboard | Not implemented | N/A |
 
 **No legal, immigration or financial-aid advice.** Awards never guaranteed. Student data requires explicit consent, an encrypted vault key and additional security controls before real use; no production SaaS readiness claimed.
@@ -70,4 +70,4 @@ CI enforces Ruff lint/format, mypy --strict on src/, Python 3.11/3.12, pytest >=
 - Browser login uses ephemeral access code, HttpOnly SameSite=Strict cookie, trusted Host restrictions and CSRF/Origin checks. Browser-input HTML is escaped; no CDN or external JS is loaded. Not independently security-audited.
 - Student onboarding, encrypted profile persistence, searchable institutional **unverified source links**, demo agent workflow and manual packet approval screens are implemented. The award catalog used by default is **fictional**.
 - No actual scholarship applicant matching from a reviewed real catalog, no hosted auth, no scholarship portal login or submission. Always `NOT_SUBMITTED`.
-- Automated UI tests are included; see final CI for complete pass and coverage metrics.
+- [CI feature-branch verification](https://github.com/nguyenbui1105/scholaros/actions/runs/45000116305): **183 tests passed**, **86.24% statement coverage** on Python 3.11; Ruff lint+format, strict mypy, Python 3.11/3.12, dependency audit and Gitleaks passed. Final main branch requires a fresh CI check.

@@ -63,3 +63,7 @@ Web dependencies are optional for CLI-only installs. The web UI test suite uses 
 ## Next milestone
 
 Replace synthetic award catalog with reviewed individual-award records and per-requirement provenance, add a transparent human verification workflow, real deadline validation, and accessible essay/packet editing. A real provider submission adapter requires official terms/permission, explicit applicant approval of the exact destination and packet, and independently verified receipt tracking. No CAPTCHA circumvention.
+
+## Verified offline test result
+
+The feature branch passed **183 tests** with **86.24% statement coverage** in [CI 45000116305](https://github.com/nguyenbui1105/scholaros/actions/runs/45000116305). This verifies the localhost workflow with synthetic fixtures, **not** a real-provider scholarship search, eligibility outcome, or application submission.

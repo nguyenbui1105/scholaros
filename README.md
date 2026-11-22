@@ -207,7 +207,7 @@ python -m scholaros.benchmark
 python scripts/verify_skills.py
 ```
 
-An 83-pair **independently labeled synthetic** benchmark enforces **zero false-ELIGIBLE predictions** and **at least 95% unsupported-claim recall**. The latest assisted-workspace CI passed **175 tests** at **86.54% statement coverage** (Python 3.11), including installed CLI onboarding and packet-review smoke tests. Synthetic eligibility results remain distinct from real scholarship performance. Read [evaluation and limitations](docs/EVALUATION.md) before interpreting any numbers.
+An 83-pair **independently labeled synthetic** benchmark enforces **zero false-ELIGIBLE predictions** and **at least 95% unsupported-claim recall**. The v0.5 local UI CI passed **183 tests** at **86.24% statement coverage** (Python 3.11), including login, CSRF/Origin, HTML escaping, encrypted profile onboarding, agent packets and hash-bound approval tests. Synthetic eligibility results remain distinct from real scholarship performance. Read [evaluation and limitations](docs/EVALUATION.md) before interpreting any numbers.
 
 ## 🛣 Next steps
 
