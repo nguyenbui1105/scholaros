@@ -38,6 +38,20 @@
 
 See [precise status](docs/STATUS.md). A real optional OpenAI SDK adapter exists but has **no live integration test**.
 
+## 🔎 v0.8 Scholarship lead discovery inbox (unreleased)
+
+The localhost dashboard now includes **Discover leads**. Paste a scholarship
+index page's URL and HTML that you are permitted to use: ScholarOS extracts
+same-origin scholarship-like links, deduplicates them and stores an encrypted
+inbox. Open each link yourself and paste its individual award content to
+promote a lead into the existing source-verification queue.
+
+**This feature does not fetch pages from the internet**. It is a link-discovery
+tool over user-supplied HTML, not a live web crawler or eligibility verifier.
+Every lead remains `UNREVIEWED_CANDIDATE`, every imported award remains
+`NEEDS_VERIFICATION`, and every application remains `NOT_SUBMITTED`.
+Read [the v0.8 workflow](docs/DISCOVERY_INBOX.md).
+
 ## 🎯 v0.7 Cited preliminary matching (unreleased)
 
 After saving a real individual scholarship page under **My researched awards**,

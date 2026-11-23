@@ -97,3 +97,20 @@ CI enforces Ruff lint/format, mypy --strict on src/, Python 3.11/3.12, pytest >=
 - [GitHub Actions CI 45086280411](https://github.com/nguyenbui1105/scholaros/actions/runs/45086280411) passed all four jobs: Python 3.11 and 3.12, Ruff lint/format, mypy strict, pip-audit and Gitleaks.
 - **210 tests passing; 86.85% statement coverage** measured on Python 3.11; no real-source eligibility precision/recall claims.
 - Browser review remains a local self-attestation, not independent authoritative verification; all imported awards stay needs_verification and NOT_SUBMITTED.
+
+## v0.8 Discovery Inbox (offline-only, unreleased)
+
+- Added local browser **Discover leads** to parse same-origin scholarship-like
+  links from *user-supplied HTML*, storing up to 250 deduplicated URL candidates
+  with encrypted provenance in `.scholaros/discovery_leads.enc`.
+- Each candidate can be explicitly promoted to an award snapshot **only when
+  the user supplies the individual award page's text**. Research and
+  preliminary matching remain in the existing encrypted workflow.
+- [Feature-branch CI 45112734971](https://github.com/nguyenbui1105/scholaros/actions/runs/45112734971):
+  **219 tests passing, 87.04% statement coverage** on Python 3.11;
+  Python 3.12, Ruff lint/format, mypy strict, dependency audit, and Gitleaks
+  all succeeded.
+- **Network requests: zero** in the new discovery workflow. Source identity,
+  website permissions, award-specific eligibility and actual application
+  submission are not inferred from links. Final eligibility remains
+  NEEDS_VERIFICATION and application status NOT_SUBMITTED.

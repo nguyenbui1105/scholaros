@@ -78,6 +78,17 @@ See [web UI guide](WEB_UI.md) and [implementation plan](V05_PLAN.md).
 - [ ] Real official award discovery with permission, award-specific document preparation and human-reviewed essays
 - [ ] Provider-authorized submission APIs with exact-destination approval and receipts
 
+## v0.8 — local discovery lead inbox
+
+- [x] Find same-origin scholarship-like links from supplied public index HTML
+- [x] Encrypt, deduplicate, search and bound unverified candidate links
+- [x] Promote a lead only with explicitly pasted individual-award source text
+- [x] Dashboard workflow and offline tests for origin/CSRF, URL constraints
+- [ ] Operator-authorized and provider-permitted LIVE discovery/crawling
+- [ ] Current individual-award catalog with verified source identity and terms
+- [ ] Broad F-1/citizenship/school/degree/major eligibility adjudication
+- [ ] Provider-specific real submissions with approved packet and verified receipt
+
 ## Next — grounded public-source beta
 - [ ] Independent real-source authority/permission validation and repeatable robots compliance
 - [ ] Manually adjudicated eligibility cases from multiple providers (F-1, citizenship, enrollment conditions)

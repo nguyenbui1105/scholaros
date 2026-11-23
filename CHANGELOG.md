@@ -1,5 +1,22 @@
 # Changelog
 
+## [Unreleased] — v0.8 local scholarship discovery inbox
+
+- Added `discovery_inbox.py`: encrypted same-origin scholarship-like URL
+  discovery from manually supplied HTML and approved-looking index URL.
+- Added browser **Discover leads** with authenticated, CSRF-protected intake,
+  filtered lead list and explicit one-lead-at-a-time text promotion into the
+  encrypted real-award research queue.
+- Bounded inputs and total leads; excluded login/application paths, PDFs and
+  off-site links; deduplicated URLs and preserved index hash/provenance.
+- All leads **UNREVIEWED_CANDIDATE**, all imported awards
+  **NEEDS_VERIFICATION**, all applications **NOT_SUBMITTED**.
+- **No live crawler, provider permission checker, verified individual award
+  catalog or external portal submission** is claimed.
+- Tested offline via `tests/test_discovery_inbox.py`. Documentation:
+  `docs/DISCOVERY_INBOX.md`.
+
+
 ## [Unreleased] — v0.7 Cited preliminary scholarship matching
 
 - Added encrypted source-version-bound reviewer attestations of verbatim GPA, F-1 and deadline quotes.
