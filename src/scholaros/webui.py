@@ -22,6 +22,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from starlette.datastructures import FormData
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
+from .discovery_inbox import discover_index, promote_with_pasted_text, summarize_leads
 from .profile_triage import ReviewedConstraint, compare_profile, load_reviews, save_review
 from .records import EvidenceItem, StudentProfile
 from .source_intake import import_award, load_awards, summarize_awards
@@ -78,6 +79,7 @@ def _html(title: str, contents: str, *, authenticated: bool = True) -> HTMLRespo
         '<a href="/sources">Scholarship sources</a>'
         '<a href="/my-sources">My researched awards</a>'
         '<a href="/triage">Preliminary matching</a>'
+        '<a href="/discover">Discover leads</a>'
         '<a href="/applications">Applications</a></nav>'
         if authenticated
         else ""
@@ -115,12 +117,14 @@ def create_app(
     sources_path: Path,
     imported_sources_path: Path | None = None,
     reviews_path: Path | None = None,
+    discovery_path: Path | None = None,
 ) -> FastAPI:
     """Create one local user instance. This is NOT a public multi-user service."""
     if not os.environ.get("SCHOLAROS_FERNET_KEY"):
         raise RuntimeError("SCHOLAROS_FERNET_KEY must be configured before web startup")
     research_store = imported_sources_path or profile_path.parent / "source_awards.enc"
     review_store = reviews_path or profile_path.parent / "source_reviews.enc"
+    lead_store = discovery_path or profile_path.parent / "discovery_leads.enc"
     if len(access_code) < 8:
         raise ValueError("Local access code is too short")
     app = FastAPI(
@@ -550,6 +554,88 @@ def create_app(
                 status_code=400,
             )
         return RedirectResponse("/triage", status_code=303)
+
+
+    @app.get("/discover", response_class=HTMLResponse)
+    async def discover_page(request: Request) -> Response:
+        denied = gate(request)
+        if denied:
+            return denied
+        term = (request.query_params.get("q") or "").strip()[:80]
+        leads = summarize_leads(lead_store, search=term)
+        cards: list[str] = []
+        for lead in leads:
+            cards.append(
+                '<section class="panel"><span class="pill">UNREVIEWED_CANDIDATE</span>'
+                f'<h2>{_text(lead["url"])}</h2>'
+                f'<p class="note">Discovered from: {_text(lead["index_url"])}'
+                ' · needs_verification · NOT_SUBMITTED</p>'
+                '<details><summary>Import the individual award page you reviewed</summary>'
+                '<p class="note">Open the link yourself, confirm source/permissions, then'
+                ' paste the page contents below. ScholarOS performs no network request.</p>'
+                '<form method="post" action="/discover/import">'
+                + csrf()
+                + f'<input type="hidden" name="lead_id" value="{_text(lead["id"])}">'
+                + _input("Individual scholarship title", "title", required=True)
+                + '<label for="source_text">Verbatim public award page content</label>'
+                '<textarea name="source_text" rows="7" maxlength="120000" required>'
+                '</textarea><button type="submit">Import for manual verification</button>'
+                '</form></details></section>'
+            )
+        page = (
+            '<h1>Discover scholarship leads</h1>'
+            '<p class="lead">Paste HTML from a public scholarship index that you '
+            'have permission to use. We identify same-origin scholarship-like links '
+            'without connecting to any website. These are leads, not verified awards.</p>'
+            '<div class="warn">No live crawling, eligibility confirmation or submission. '
+            'Use individual provider pages to verify each lead.</div>'
+            '<section class="panel"><form method="post" action="/discover">'
+            + csrf()
+            + _input("Official HTTPS scholarship index URL", "index_url", required=True)
+            + '<label for="index_html">Saved public index HTML</label>'
+            '<textarea id="index_html" name="index_html" rows="8" '
+            'maxlength="250000" required></textarea>'
+            '<button type="submit">Discover candidate links</button></form></section>'
+            '<form method="get" action="/discover">'
+            + _input("Filter leads", "q", term)
+            + '<button type="submit">Filter</button></form>'
+        )
+        return _html("Scholarship lead discovery", page + "".join(cards))
+
+    @app.post("/discover")
+    async def discover_submit(request: Request) -> Response:
+        form = await request.form()
+        if not safe_post(request, form):
+            return HTMLResponse("Forbidden", status_code=403)
+        try:
+            discover_index(
+                lead_store,
+                index_url=_field(form, "index_url"),
+                index_html=_field(form, "index_html"),
+            )
+        except (OSError, ValueError, RuntimeError):
+            return HTMLResponse(
+                "Discovery rejected: use a permitted institutional index and valid HTML",
+                status_code=400,
+            )
+        return RedirectResponse("/discover", status_code=303)
+
+    @app.post("/discover/import")
+    async def discover_import(request: Request) -> Response:
+        form = await request.form()
+        if not safe_post(request, form):
+            return HTMLResponse("Forbidden", status_code=403)
+        try:
+            promote_with_pasted_text(
+                lead_store, research_store,
+                lead_id=_field(form, "lead_id"),
+                title=_field(form, "title"),
+                source_text=_field(form, "source_text"),
+            )
+        except (OSError, ValueError, RuntimeError):
+            return HTMLResponse("Cannot import: check the lead and exact award text",
+                                status_code=400)
+        return RedirectResponse("/my-sources", status_code=303)
 
     @app.post("/run")
     async def run_agents(request: Request) -> Response:
