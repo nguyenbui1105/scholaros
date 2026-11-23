@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased] — v0.7 Cited preliminary scholarship matching
+
+- Added encrypted source-version-bound reviewer attestations of verbatim GPA, F-1 and deadline quotes.
+- Added source-aware and applicant-specific preliminary matching; unknown / potential mismatch / potential match separated, all with final NEEDS_VERIFICATION.
+- Added localhost Preliminary matching UI, CSRF-protected reviewer form, and explicit NOT_SUBMITTED status.
+- Added regression coverage for conflicting/negated statements, stale source revisions, mismatched hashes, missing student details, encrypted review storage and browser security.
+- **Not** a verified real-world eligibility scorer, official-source validator, essay generator or automatic submission integration. Read `docs/PROFILE_TRIAGE.md`.
+
+
 ## [Unreleased] — v0.6 individual scholarship source intake
 
 - Added manual individual-award source URL/text intake to the authenticated localhost UI.

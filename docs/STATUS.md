@@ -25,6 +25,7 @@
 | Real provider-approved submit adapters, receipt verification and portal automation | **Not implemented** | Explicitly blocked |
 | Localhost-only student dashboard with login, profile, source directory, workflow, packet review/approval | Implemented and offline-tested | `src/scholaros/webui.py`, `tests/test_webui.py` |
 | Manually imported individual award page text, encrypted versioned snapshots, quote candidates and review checklist | Implemented; offline tests | `source_intake.py`, `test_source_intake.py` |
+| v0.7 Local cited F-1/GPA/deadline preliminary screening against real pasted sources | Implemented, CI pending | `profile_triage.py`, `tests/test_profile_triage.py`, `tests/test_triage_web.py` |
 | Automatically validated individual-award eligibility from official live sources | Not implemented | Must be manually adjudicated |
 | Hosted SaaS authentication / multi-user dashboard | Not implemented | N/A |
 
@@ -85,3 +86,9 @@ CI enforces Ruff lint/format, mypy --strict on src/, Python 3.11/3.12, pytest >=
 - Browser flow tested: authenticated individual-award intake, anti-CSRF, HTML escaping, encrypted deduplication, content hashes, source-specific manual review, and display in Applications with no automatic eligibility or submission.
 - Fixed a probabilistic/flaky legacy encryption assertion: encrypted Base64 ciphertext can coincidentally contain a short plaintext substring, so tests now check successful authenticated Fernet decryption instead of substring absence.
 - **No real-world validated award catalog, automatic eligibility score or authorized submission connector.** This remains an evidence-first assisted workflow, not a fully autonomous application service.
+
+## v0.7 Cited local profile triage (unreleased)
+- Added browser **Preliminary matching** with exact source quote forms, student profile comparisons and encrypted local review records.
+- Checks positive F-1 language, numeric minimum GPA and ISO deadline only when cited excerpts are verbatim and source URL/hash/version match. Rejected negated contexts and tampered records are explicitly tested.
+- Source text and local review are applicant-supplied; these are **not independent institutional verification**. Screening labels `potential_match`/`potential_mismatch`/`needs_verification` are preliminary only. Final eligibility remains `needs_verification` and submission remains `NOT_SUBMITTED`.
+- No real-world accuracy claim, live crawler or portal submission. See [PROFILE_TRIAGE.md](PROFILE_TRIAGE.md).

@@ -38,6 +38,21 @@
 
 See [precise status](docs/STATUS.md). A real optional OpenAI SDK adapter exists but has **no live integration test**.
 
+## 🎯 v0.7 Cited preliminary matching (unreleased)
+
+After saving a real individual scholarship page under **My researched awards**,
+open **Preliminary matching** in the localhost dashboard. For a specific
+encrypted source snapshot, paste verbatim excerpts supporting the **F-1**
+requirement, minimum **GPA** and **deadline**. ScholarOS performs a conservative
+comparison against your encrypted student profile, reporting
+`potential_match`, `potential_mismatch`, or `needs_verification`.
+
+**Critical:** these are *self-reviewed, preliminary* screening results,
+**not verified provider eligibility**. All imported awards remain
+`eligibility=needs_verification` and `NOT_SUBMITTED` until independent provider
+verification and any supported submission workflow. Details:
+[Local cited matching guide](docs/PROFILE_TRIAGE.md).
+
 ## 🧭 v0.6 Individual-award research intake (unreleased)
 
 Instead of being limited to a fictional award catalog, the localhost dashboard

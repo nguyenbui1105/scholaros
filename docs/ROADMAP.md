@@ -69,6 +69,15 @@ See [web UI guide](WEB_UI.md) and [implementation plan](V05_PLAN.md).
 - [ ] Generate complete student-reviewed essays and evidence packets where allowed
 - [ ] Permitted submission adapters, exact destination approval and verified receipts
 
+## v0.7 — local cited profile triage
+- [x] Encrypted reviewer observations bound to exact source hash and award revision
+- [x] Conservative cited F-1, minimum GPA and deadline comparison to student profile
+- [x] Web preliminary screen and explicit unverified / not-submitted outcomes
+- [ ] Validate institutional source identity, scholarship cycle, and all citizenship/visa exceptions independently
+- [ ] Compare school, academic level, major and other requirements from independently validated rules
+- [ ] Real official award discovery with permission, award-specific document preparation and human-reviewed essays
+- [ ] Provider-authorized submission APIs with exact-destination approval and receipts
+
 ## Next — grounded public-source beta
 - [ ] Independent real-source authority/permission validation and repeatable robots compliance
 - [ ] Manually adjudicated eligibility cases from multiple providers (F-1, citizenship, enrollment conditions)
