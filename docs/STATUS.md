@@ -25,7 +25,7 @@
 | Real provider-approved submit adapters, receipt verification and portal automation | **Not implemented** | Explicitly blocked |
 | Localhost-only student dashboard with login, profile, source directory, workflow, packet review/approval | Implemented and offline-tested | `src/scholaros/webui.py`, `tests/test_webui.py` |
 | Manually imported individual award page text, encrypted versioned snapshots, quote candidates and review checklist | Implemented; offline tests | `source_intake.py`, `test_source_intake.py` |
-| v0.7 Local cited F-1/GPA/deadline preliminary screening against real pasted sources | Implemented, CI pending | `profile_triage.py`, `tests/test_profile_triage.py`, `tests/test_triage_web.py` |
+| v0.7 Local cited F-1/GPA/deadline preliminary screening against real pasted sources | Implemented and offline-tested | `profile_triage.py`, `tests/test_profile_triage.py`, `tests/test_triage_web.py` |
 | Automatically validated individual-award eligibility from official live sources | Not implemented | Must be manually adjudicated |
 | Hosted SaaS authentication / multi-user dashboard | Not implemented | N/A |
 
@@ -92,3 +92,8 @@ CI enforces Ruff lint/format, mypy --strict on src/, Python 3.11/3.12, pytest >=
 - Checks positive F-1 language, numeric minimum GPA and ISO deadline only when cited excerpts are verbatim and source URL/hash/version match. Rejected negated contexts and tampered records are explicitly tested.
 - Source text and local review are applicant-supplied; these are **not independent institutional verification**. Screening labels `potential_match`/`potential_mismatch`/`needs_verification` are preliminary only. Final eligibility remains `needs_verification` and submission remains `NOT_SUBMITTED`.
 - No real-world accuracy claim, live crawler or portal submission. See [PROFILE_TRIAGE.md](PROFILE_TRIAGE.md).
+
+## v0.7 CI verification (2026-11-22/23 UTC)
+- [GitHub Actions CI 45086280411](https://github.com/nguyenbui1105/scholaros/actions/runs/45086280411) passed all four jobs: Python 3.11 and 3.12, Ruff lint/format, mypy strict, pip-audit and Gitleaks.
+- **210 tests passing; 86.85% statement coverage** measured on Python 3.11; no real-source eligibility precision/recall claims.
+- Browser review remains a local self-attestation, not independent authoritative verification; all imported awards stay needs_verification and NOT_SUBMITTED.

@@ -27,3 +27,7 @@ This builds on [manual individual-award intake](SOURCE_INTAKE.md). **It is NOT a
 A permission-reviewed live award catalog, source authenticity checks and independent double annotation, complete scholarship-specific eligibility logic, student-authored/approved essays and documents, authorized per-provider submission adapters and verified provider receipts are still **not built**. Never treat the ranking of locally reviewed quotes as a verified eligibility result or an application.
 
 Run offline tests with `pytest -q tests/test_profile_triage.py tests/test_triage_web.py`. Continuous integration also covers existing scholarship cases, encrypted workspace and security rules.
+
+## Verified CI
+
+The isolated feature-branch [CI 45086280411](https://github.com/nguyenbui1105/scholaros/actions/runs/45086280411) passed **210 automated tests** with **86.85% coverage** on Python 3.11, with Python 3.12, strict type checks, lint and security scan passing. These metrics measure code correctness on fictional test fixtures; they do **not** represent scholarship eligibility accuracy on real awards.
