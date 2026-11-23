@@ -22,6 +22,7 @@ from .source_intake import ImportedAward
 from .workspace import load_private, save_private
 
 Screen = Literal["potential_match", "potential_mismatch", "needs_verification"]
+Check = Literal["preliminary_match", "potential_mismatch", "needs_verification"]
 _MINIMUM_GPA = re.compile(
     r"\b(?:minimum\s+gpa|gpa\s+(?:of\s+)?(?:at\s+least|minimum\s+of))"
     r"\s*[:=]?\s*(\d(?:\.\d{1,2})?)\b",
@@ -124,7 +125,7 @@ def compare_profile(
     """Local shortlist helper. NEVER returns eligible or final ineligible."""
     if type(today) is not date:
         raise ValueError("Use the provider-local calendar date for preliminary deadlines")
-    checks: dict[str, Screen] = {
+    checks: dict[str, Check] = {
         "visa_status": "needs_verification",
         "gpa": "needs_verification",
         "deadline": "needs_verification",
