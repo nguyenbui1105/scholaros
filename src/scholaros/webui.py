@@ -555,7 +555,6 @@ def create_app(
             )
         return RedirectResponse("/triage", status_code=303)
 
-
     @app.get("/discover", response_class=HTMLResponse)
     async def discover_page(request: Request) -> Response:
         denied = gate(request)
@@ -567,12 +566,12 @@ def create_app(
         for lead in leads:
             cards.append(
                 '<section class="panel"><span class="pill">UNREVIEWED_CANDIDATE</span>'
-                f'<h2>{_text(lead["url"])}</h2>'
+                f"<h2>{_text(lead['url'])}</h2>"
                 f'<p class="note">Discovered from: {_text(lead["index_url"])}'
-                ' · needs_verification · NOT_SUBMITTED</p>'
-                '<details><summary>Import the individual award page you reviewed</summary>'
+                " · needs_verification · NOT_SUBMITTED</p>"
+                "<details><summary>Import the individual award page you reviewed</summary>"
                 '<p class="note">Open the link yourself, confirm source/permissions, then'
-                ' paste the page contents below. ScholarOS performs no network request.</p>'
+                " paste the page contents below. ScholarOS performs no network request.</p>"
                 '<form method="post" action="/discover/import">'
                 + csrf()
                 + f'<input type="hidden" name="lead_id" value="{_text(lead["id"])}">'
@@ -580,15 +579,15 @@ def create_app(
                 + '<label for="source_text">Verbatim public award page content</label>'
                 '<textarea name="source_text" rows="7" maxlength="120000" required>'
                 '</textarea><button type="submit">Import for manual verification</button>'
-                '</form></details></section>'
+                "</form></details></section>"
             )
         page = (
-            '<h1>Discover scholarship leads</h1>'
+            "<h1>Discover scholarship leads</h1>"
             '<p class="lead">Paste HTML from a public scholarship index that you '
-            'have permission to use. We identify same-origin scholarship-like links '
-            'without connecting to any website. These are leads, not verified awards.</p>'
+            "have permission to use. We identify same-origin scholarship-like links "
+            "without connecting to any website. These are leads, not verified awards.</p>"
             '<div class="warn">No live crawling, eligibility confirmation or submission. '
-            'Use individual provider pages to verify each lead.</div>'
+            "Use individual provider pages to verify each lead.</div>"
             '<section class="panel"><form method="post" action="/discover">'
             + csrf()
             + _input("Official HTTPS scholarship index URL", "index_url", required=True)
@@ -627,14 +626,16 @@ def create_app(
             return HTMLResponse("Forbidden", status_code=403)
         try:
             promote_with_pasted_text(
-                lead_store, research_store,
+                lead_store,
+                research_store,
                 lead_id=_field(form, "lead_id"),
                 title=_field(form, "title"),
                 source_text=_field(form, "source_text"),
             )
         except (OSError, ValueError, RuntimeError):
-            return HTMLResponse("Cannot import: check the lead and exact award text",
-                                status_code=400)
+            return HTMLResponse(
+                "Cannot import: check the lead and exact award text", status_code=400
+            )
         return RedirectResponse("/my-sources", status_code=303)
 
     @app.post("/run")

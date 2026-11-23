@@ -120,9 +120,7 @@ def promote_with_pasted_text(
     lead = next((item for item in load_leads(inbox_path) if item.id == lead_id), None)
     if lead is None:
         raise ValueError("Unknown discovery lead")
-    award = import_award(
-        awards_path, title=title, source_url=lead.url, source_text=source_text
-    )
+    award = import_award(awards_path, title=title, source_url=lead.url, source_text=source_text)
     return {
         "lead_id": lead.id,
         "award_id": award.id,

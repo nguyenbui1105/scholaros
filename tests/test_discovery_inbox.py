@@ -62,11 +62,17 @@ def test_promote_requires_explicit_text_and_stays_unverified(tmp_path: Path, key
     lead = load_leads(inbox)[0]
     with pytest.raises(ValueError, match="Unknown"):
         promote_with_pasted_text(
-            inbox, awards, lead_id="not-in-inbox",
-            title="Award", source_text=AWARD_TEXT,
+            inbox,
+            awards,
+            lead_id="not-in-inbox",
+            title="Award",
+            source_text=AWARD_TEXT,
         )
     result = promote_with_pasted_text(
-        inbox, awards, lead_id=lead.id, title="Example award",
+        inbox,
+        awards,
+        lead_id=lead.id,
+        title="Example award",
         source_text=AWARD_TEXT,
     )
     assert result["eligibility"] == "needs_verification"
@@ -77,12 +83,15 @@ def test_promote_requires_explicit_text_and_stays_unverified(tmp_path: Path, key
     assert b"Individual undergraduate" not in awards.read_bytes()
 
 
-@pytest.mark.parametrize("base", [
-    "https://example.com/scholarships",
-    "http://scholarships.example.edu/scholarships",
-    "https://scholarships.example.edu:444/scholarships",
-    "https://scholarships.example.edu@attacker.example/scholarships",
-])
+@pytest.mark.parametrize(
+    "base",
+    [
+        "https://example.com/scholarships",
+        "http://scholarships.example.edu/scholarships",
+        "https://scholarships.example.edu:444/scholarships",
+        "https://scholarships.example.edu@attacker.example/scholarships",
+    ],
+)
 def test_bad_source_rejected(tmp_path: Path, key: None, base: str) -> None:
     with pytest.raises(ValueError):
         discover_index(tmp_path / "leads.enc", index_url=base, index_html=HTML)
@@ -116,24 +125,47 @@ def test_web_auth_csrf_and_import_workflow(tmp_path: Path, key: None) -> None:
     )
     client = TestClient(app, base_url="http://localhost")
     assert client.get("/discover", follow_redirects=False).status_code == 303
-    assert client.post("/discover", data={"index_url": INDEX, "index_html": HTML}).status_code == 403
+    assert (
+        client.post("/discover", data={"index_url": INDEX, "index_html": HTML}).status_code == 403
+    )
     client.post("/unlock", data={"access_code": "long-secret-access-code"})
     match = re.search(r'name="csrf" value="([^"]+)"', client.get("/").text)
     assert match
     csrf = match.group(1)
-    assert client.post("/discover", data={
-        "csrf": csrf, "index_url": INDEX, "index_html": HTML,
-    }, headers={"Origin": "https://attacker.example"}).status_code == 403
-    saved = client.post("/discover", data={
-        "csrf": csrf, "index_url": INDEX, "index_html": HTML,
-    }, follow_redirects=False)
+    assert (
+        client.post(
+            "/discover",
+            data={
+                "csrf": csrf,
+                "index_url": INDEX,
+                "index_html": HTML,
+            },
+            headers={"Origin": "https://attacker.example"},
+        ).status_code
+        == 403
+    )
+    saved = client.post(
+        "/discover",
+        data={
+            "csrf": csrf,
+            "index_url": INDEX,
+            "index_html": HTML,
+        },
+        follow_redirects=False,
+    )
     assert saved.status_code == 303
     assert "UNREVIEWED_CANDIDATE" in client.get("/discover").text
     lead = load_leads(inbox)[0]
-    imported = client.post("/discover/import", data={
-        "csrf": csrf, "lead_id": lead.id, "title": "Local example",
-        "source_text": AWARD_TEXT,
-    }, follow_redirects=False)
+    imported = client.post(
+        "/discover/import",
+        data={
+            "csrf": csrf,
+            "lead_id": lead.id,
+            "title": "Local example",
+            "source_text": AWARD_TEXT,
+        },
+        follow_redirects=False,
+    )
     assert imported.status_code == 303
     assert len(load_awards(awards)) == 1
     assert "NEEDS_VERIFICATION" in client.get("/my-sources").text
